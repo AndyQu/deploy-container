@@ -11,6 +11,8 @@ class TestDeploy {
     def void setup() {
         queueMeta = new ProjectMeta(
                 Name: "qgc",
+                GitRepoUri: "ssh://git@git.sankuai.com/srt/srqserver.git",
+                GitbranchName: "master",
                 PortList:[
                         ["Port":8080,"Description":"http jetty port"] as PortMeta
                 ],

@@ -21,7 +21,7 @@ class DeployEngine {
         dClient = new DockerClientImpl(dockerHost: dockerHost,)
     }
 
-    def _deploy(String containerId, ProjectMeta pMeta) {
+    def _deploy(String contextFolderPath, String containerId, ProjectMeta pMeta) {
         /**
          * 产生bash脚本,用于在docker容器内部部署Project:
          * 1. 创建环境变量
@@ -29,13 +29,48 @@ class DeployEngine {
          * 3. 初始化subModule,并且切换到分支:SubModuleBranchName(如果subModuleBranchName为空,则不需要作这一步)
          * 4. deployScriptFile的bash command
          */
+        def deployScriptPath = "${contextFolderPath}/scripts/deploy_${pMeta.Name}.sh"
+        def deployFile = new File(deployScriptPath)
+        deployFile.createNewFile()
+        /**
+         * 拉取主工程代码
+         */
+        deployFile << """
+mkdir -p /src/
+cd /src/
+git clone ${pMeta.GitRepoUri} ${pMeta.Name}
+cd ${pMeta.Name}
+git checkout ${pMeta.GitbranchName}
+git pull
+"""
+        /**
+         * 拉取子工程代码
+         */
+        if (pMeta.SubModuleBranchName != null) {
+            deployFile """
+git submodule init
+git submodule update
+git submodule foreach git checkout ${pMeta.SubModuleBranchName}
+"""
+        }
+        /**
+         * 个性化部署脚本
+         */
+        if(pMeta.DeployScriptFile!=null) {
+            "cat ${pMeta.DeployScriptFile} >> ${deployScriptPath}"
+        }else{
+            logger.error("${pMeta.Name} 没有执行DeployScriptFile")
+        }
 
         /**
          * 使用docker exec API接口, 执行自动产生的bash脚本
          */
+        dClient.exec(containerId,['/bin/bash','/scripts/deploy_${pMeta.Name}.sh'])
     }
 
     def deploy(String ownerName, List<ProjectMeta> pMetaList) {
+        def contextFolderPath = null
+        def deployScriptPath = null
         /**
          * 根据分支名称,产生md5,与ownerName一起作为docker的名称
          *
@@ -44,6 +79,7 @@ class DeployEngine {
             pMeta ->
                 pMeta.GitbranchName
         }.join("-"))
+        contextFolderPath = "/docker-deploy/${dockerName}/"
 
         /**
          * 端口映射信息处理:
@@ -62,17 +98,17 @@ class DeployEngine {
         /**
          * 需要挂载的目录:
          */
-        def (allMountPoints, nonLibMountPoints) = calcMountPoints(pMetaList, dockerName)
+        def (allMountPoints, nonLibMountPoints) = calcMountPoints(pMetaList, dockerName, contextFolderPath)
         /**
          * 停止/删除已存在的container
          */
-        if (container!=null) {
+        if (container != null) {
             dClient.stopAndRemoveContainer(container.Id)
         }
         /**
          * 创建/docker-deploy目录
          * 在/docker-deploy目录下面创建属于本次部署的私有目录: /docker-deploy/${docker-name}*/
-        buildContextFolder("/docker-deploy/${dockerName}/", nonLibMountPoints)
+        buildContextFolder(contextFolderPath, nonLibMountPoints)
 
         /**
          * 再创建docker container
@@ -119,7 +155,10 @@ class DeployEngine {
         /**
          * 对于每一个ProjectMeta, 进行部署工作
          */
-
+        pMetaList.each {
+            pMeta ->
+                _deploy(contextFolderPath, response.content.Id, pMeta)
+        }
     }
 
     /**
@@ -179,7 +218,7 @@ class DeployEngine {
             portMeta ->
                 for (nextPort++; Tool.isPortInUse("0.0.0.0", nextPort); nextPort++) {
                 }
-                def p = [IP: host, PrivatePort: portMeta.Port, PublicPort: nextPort, Type: "tcp"] as LazyMap
+                def p = [IP: '0.0.0.0', PrivatePort: portMeta.Port, PublicPort: nextPort, Type: "tcp"] as LazyMap
                 logger.info("found port:${p}")
                 p
         }
@@ -196,7 +235,7 @@ class DeployEngine {
      * @param pMetaList
      * @return
      */
-    def static calcMountPoints(List<ProjectMeta> pMetaList, dockerName) {
+    def static calcMountPoints(List<ProjectMeta> pMetaList, dockerName, contextFolderPath) {
         Set<String> containerInnerVolumnSet = pMetaList.inject(new HashSet<>()) {
             volumnSet, pMeta ->
                 if (pMeta.LogFolder != null) {
@@ -210,12 +249,13 @@ class DeployEngine {
                 }
                 volumnSet
         }
+        containerInnerVolumnSet.add("/scripts")
         List<Object> mounts = containerInnerVolumnSet.collect {
             path ->
                 [
-                        "Source"     : "/docker-deploy/${dockerName}/" + path.split("/").last(),
+                        "Source"     : "${contextFolderPath}/" + path.split("/").last(),
                         "Destination": path,
-                        "Mode"       : "ro,Z",
+                        //"Mode"       : "ro,Z",
                         "RW"         : true
                 ]
         }
@@ -227,17 +267,21 @@ class DeployEngine {
             ])
         }
         if (pMetaList.find { pMeta -> pMeta.NeedMountGradleLib }) {
-            mounts.add([
-                    "Source"     : "/home/sankuai/.gradle/",
-                    "Destination": "/root/.gradle/",
-                    "RW"         : true
-            ])
+            mounts.add(
+                    [
+                            "Source"     : "/home/sankuai/.gradle/",
+                            "Destination": "/root/.gradle/",
+                            "RW"         : true
+                    ]
+            )
         }
-        mounts.add([
-                "Source"     : "/home/sankuai/.ssh/",
-                "Destination": "/root/.ssh",
-                "RW"         : true
-        ])
+        mounts.add(
+                [
+                        "Source"     : "/home/sankuai/.ssh/",
+                        "Destination": "/root/.ssh",
+                        "RW"         : true
+                ]
+        )
         [mounts, containerInnerVolumnSet]
     }
 
@@ -253,7 +297,8 @@ class DeployEngine {
         contextFile.mkdirs()
         subFolders.each {
             path ->
-                new File("${contextDir}/" + path.split("/").last()).mkdirs()
+                def ret = new File("${contextDir}/" + path.split("/").last()).mkdirs()
+                println ret
         }
     }
 }
