@@ -2,6 +2,7 @@ package com.sankuai.srq.deploy
 
 import de.gesellix.docker.client.DockerClient
 import de.gesellix.docker.client.DockerClientImpl
+import de.gesellix.docker.client.DockerResponse
 import groovy.json.JsonBuilder
 import groovy.json.internal.LazyMap
 import org.slf4j.LoggerFactory
@@ -47,7 +48,7 @@ git pull
          * 拉取子工程代码
          */
         if (pMeta.SubModuleBranchName != null) {
-            deployFile """
+            deployFile << """
 git submodule init
 git submodule update
 git submodule foreach git checkout ${pMeta.SubModuleBranchName}
@@ -67,7 +68,16 @@ git submodule foreach git checkout ${pMeta.SubModuleBranchName}
         /**
          * 使用docker exec API接口, 执行自动产生的bash脚本
          */
-        def execStream = dClient.exec(containerId, ['/bin/bash', '/scripts/deploy_${pMeta.Name}.sh'])
+        DockerResponse response = dClient.exec(
+                containerId,
+                ['/bin/bash', '/scripts/deploy_${pMeta.Name}.sh'],
+                [
+                        "Detach"     : false,
+                        "AttachStdin": false,
+                        "Tty"        : false
+                ]
+        )
+        logger.info(response.stream.text)
     }
 
     def deploy(String ownerName, List<ProjectMeta> pMetaList) {
