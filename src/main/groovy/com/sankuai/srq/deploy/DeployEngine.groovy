@@ -56,16 +56,18 @@ git submodule foreach git checkout ${pMeta.SubModuleBranchName}
         /**
          * 个性化部署脚本
          */
-        if(pMeta.DeployScriptFile!=null) {
-            "cat ${pMeta.DeployScriptFile} >> ${deployScriptPath}"
-        }else{
-            logger.error("${pMeta.Name} 没有执行DeployScriptFile")
+        if (pMeta.DeployScriptFile != null) {
+            new File(pMeta.DeployScriptFile).withReader {
+                deployFile << it
+            }
+        } else {
+            throw new Exception("${pMeta.Name} 没有指定文件DeployScriptFile")
         }
 
         /**
          * 使用docker exec API接口, 执行自动产生的bash脚本
          */
-        dClient.exec(containerId,['/bin/bash','/scripts/deploy_${pMeta.Name}.sh'])
+        def execStream = dClient.exec(containerId, ['/bin/bash', '/scripts/deploy_${pMeta.Name}.sh'])
     }
 
     def deploy(String ownerName, List<ProjectMeta> pMetaList) {

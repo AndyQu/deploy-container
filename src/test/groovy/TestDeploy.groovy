@@ -19,7 +19,9 @@ class TestDeploy {
                 NeedJavaDebugPort: true,
                 LogFolder : "/opt/logs/srq/",
                 NeedMountNodeLib: true,
-                NeedMountGradleLib: true
+                NeedMountGradleLib: true,
+
+                DeployScriptFile:"/tmp/queue.sh",
         )
 
     }
