@@ -5,7 +5,6 @@ import de.gesellix.docker.client.DockerClientImpl
 import groovy.json.JsonBuilder
 import groovy.json.internal.LazyMap
 import org.slf4j.LoggerFactory
-import groovy.json.JsonOutput
 
 class DeployEngine {
     static {
@@ -54,71 +53,150 @@ class DeployEngine {
         def container = dClient.queryContainerName(dockerName)
         List<Object> configedPortList = null
         if (container != null) {
-            /**
-             * 如果存在:
-             *      1. 则检查其绑定的端口,复用它正在使用的端口. 包括debug端口
-             *      2. stop,remove docker实例(container)
-             */
-            logger.info("docker container ${dockerName} exists. Use its ports")
-            logger.info(container.Ports.toString())
-            configedPortList = container.Ports
-            dockerExists = true
+            logger.info("docker container ${dockerName} 已存在. 使用它已申请的端口")
+            configedPortList = queryExistingPorts(dClient, container)
         } else {
-            /**
-             * 不存在:
-             *      集合所有需要被映射的端口,包括debug端口
-             */
-            logger.info("[Collects Ports]Begins")
-            Set<PortMeta> portSet = pMetaList.inject(new HashSet<PortMeta>()) {
-                portSet, pMeta ->
-                    pMeta.PortList.each {
-                        portMeta ->
-                            if (portMeta.Port == 8000) {
-                                def eMsg = "project ${pMeta.Name} applies for 8000 port, which is used by Java Debug"
-                                logger.error eMsg
-                                throw new Exception(eMsg)
-                            } else if (portSet.contains(portMeta)) {
-                                def eMsg = "2 project apply for the same port:${portMeta.Port}."
-                                logger.error eMsg
-                                throw new Exception(eMsg)
-                            } else {
-                                logger.info("collect port from project ${pMeta.Name}: ${portMeta}")
-                                portSet.add(portMeta)
-                            }
-                    }
-                    portSet
-            }
-            Boolean needDebugPort = pMetaList.inject(false) {
-                needDebugPort, it -> needDebugPort || it.NeedJavaDebugPort
-            }
-            if (needDebugPort) {
-                portSet.add(new PortMeta(Port: 8000, Description: "Java Debug Port"))
-            }
-            logger.info("[Collects Ports]Ends")
-            /**
-             * 寻找可用端口
-             */
-            logger.info("[Find available ports]Begins")
-            int nextPort = 20000
-            configedPortList = portSet.collect {
-                portMeta ->
-                    for (nextPort++; Tool.isPortInUse("0.0.0.0", nextPort); nextPort++) {
-                    }
-                    def p = [IP: host, PrivatePort: portMeta.Port, PublicPort: nextPort, Type: "tcp"] as LazyMap
-                    logger.info("found port:${p}")
-                    p
-            }
-            logger.info("[Find available ports]Ends")
-            dockerExists = false
+            configedPortList = allocateNewPorts(pMetaList)
         }
 
         /**
-         * 需要挂载的目录信息处理:
-         * 1. node
-         * 2. gradle
-         * 3. ~/.ssh
-         * 4. 日志目录
+         * 需要挂载的目录:
          */
+        def (allMountPoints, nonLibMountPoints) = calcMountPoints(pMetaList, dockerName)
+        /**
+         * 停止/删除已存在的container
+         */
+        if (container!=null) {
+            dClient.stopAndRemoveContainer(container.Id)
+        }
+        /**
+         * 创建/docker-deploy目录
+         * 在/docker-deploy目录下面创建属于本次部署的私有目录: /docker-deploy/${docker-name}*/
+        buildContextFolder("/docker-deploy/${dockerName}/", nonLibMountPoints)
+
+        /**
+         * 再创建docker container
+         * 1. container名称
+         * 1. 端口映射
+         * 2. 目录挂载
+         */
+        def containerConfig = [
+                "Cmd"         : ["/sbin/init"],
+                "Image"       : "srq/ubuntu:1.0",
+                "Mounts"      : allMountPoints,
+                "ExposedPorts": configedPortList.inject(new LinkedHashMap<String, Object>()) {
+                    map, it ->
+                        map.put("${it.PrivatePort}/tcp", new LinkedHashMap<String, Object>())
+                        map
+                },
+                "HostConfig"  : [
+                        "Binds"       : allMountPoints.collect {
+                            it ->
+                                "${it.Source}:${it.Destination}"
+                        },
+                        "PortBindings": configedPortList.inject(new LinkedHashMap<String, Object>()) {
+                            map, it ->
+                                map.put("${it.PrivatePort}/tcp",
+                                        [[
+                                                 "HostPort": "${it.PublicPort}"
+                                         ]]
+                                )
+                                map
+                        }
+                ]
+        ]
+        logger.info("将要创建的container信息:")
+        logger.info(containerConfig)
+        def response = dClient.createContainer(containerConfig, [name: dockerName])
+        if (response.status.success) {
+            dClient.startContainer(response.content.Id)
+        } else {
+            logger.error("创建container失败:${dockerName}. 返回信息如下:")
+            logger.error(response)
+            throw new Exception("创建container失败:${dockerName}.")
+        }
+
+        /**
+         * 对于每一个ProjectMeta, 进行部署工作
+         */
+
+    }
+
+    /**
+     * 查询其绑定的端口
+     * @param dClient
+     * @param container
+     * @return
+     */
+    def static List<Object> queryExistingPorts(DockerClient dClient, container) {
+
+        logger.info(container.Ports.toString())
+        return container.Ports
+    }
+
+    /**
+     * 搜集并分配所有需要被映射的端口,包括debug端口
+     * @param pMetaList
+     * @return
+     */
+    def static List<Object> allocateNewPorts(List<ProjectMeta> pMetaList) {
+        /**
+         * 搜集所有需要被映射的端口
+         */
+        logger.info("[Collects Ports]Begins")
+        Set<PortMeta> portSet = pMetaList.inject(new HashSet<PortMeta>()) {
+            portSet, pMeta ->
+                pMeta.PortList.each {
+                    portMeta ->
+                        if (portMeta.Port == 8000) {
+                            def eMsg = "project ${pMeta.Name} applies for 8000 port, which is used by Java Debug"
+                            logger.error eMsg
+                            throw new Exception(eMsg)
+                        } else if (portSet.contains(portMeta)) {
+                            def eMsg = "2 project apply for the same port:${portMeta.Port}."
+                            logger.error eMsg
+                            throw new Exception(eMsg)
+                        } else {
+                            logger.info("collect port from project ${pMeta.Name}: ${portMeta}")
+                            portSet.add(portMeta)
+                        }
+                }
+                portSet
+        }
+        Boolean needDebugPort = pMetaList.inject(false) {
+            needDebugPort, it -> needDebugPort || it.NeedJavaDebugPort
+        }
+        if (needDebugPort) {
+            portSet.add(new PortMeta(Port: 8000, Description: "Java Debug Port"))
+        }
+        logger.info("[Collects Ports]Ends")
+        /**
+         * 分配可用端口
+         */
+        logger.info("[Find available ports]Begins")
+        int nextPort = 20000
+        List<Object> newPortList = portSet.collect {
+            portMeta ->
+                for (nextPort++; Tool.isPortInUse("0.0.0.0", nextPort); nextPort++) {
+                }
+                def p = [IP: host, PrivatePort: portMeta.Port, PublicPort: nextPort, Type: "tcp"] as LazyMap
+                logger.info("found port:${p}")
+                p
+        }
+        logger.info("[Find available ports]Ends")
+        newPortList
+    }
+
+    /**
+     * 需要挂载的目录信息处理:
+     * 1. node
+     * 2. gradle
+     * 3. ~/.ssh
+     * 4. 日志目录
+     * @param pMetaList
+     * @return
+     */
+    def static calcMountPoints(List<ProjectMeta> pMetaList, dockerName) {
         Set<String> containerInnerVolumnSet = pMetaList.inject(new HashSet<>()) {
             volumnSet, pMeta ->
                 if (pMeta.LogFolder != null) {
@@ -160,64 +238,22 @@ class DeployEngine {
                 "Destination": "/root/.ssh",
                 "RW"         : true
         ])
-        /**
-         * 停止/删除已存在的container
-         */
-        if (dockerExists) {
-            dClient.stopAndRemoveContainer(container.Id)
-        }
-        /**
-         * 创建/docker-deploy目录
-         * 在/docker-deploy目录下面创建属于本次部署的私有目录: /docker-deploy/${docker-name}*/
-        def contextDir = new File("/docker-deploy/${dockerName}/")
-        contextDir.deleteDir()
-        contextDir.mkdirs()
-        containerInnerVolumnSet.each {
+        [mounts, containerInnerVolumnSet]
+    }
+
+    /**
+     * 在context文件夹下面,建立工程所需要的目录
+     * @param contextDir
+     * @param subFolders
+     * @return
+     */
+    def static buildContextFolder(contextDir, subFolders) {
+        def contextFile = new File(contextDir)
+        contextFile.deleteDir()
+        contextFile.mkdirs()
+        subFolders.each {
             path ->
-                new File("/docker-deploy/${dockerName}/" + path.split("/").last()).mkdirs()
+                new File("${contextDir}/" + path.split("/").last()).mkdirs()
         }
-        /**
-         * 再创建docker container
-         * 1. container名称
-         * 1. 端口映射
-         * 2. 目录挂载
-         */
-        def containerConfig = [
-                "Cmd"         : ["/sbin/init"],
-                "Image"       : "srq/ubuntu:1.0",
-                "Mounts"      : mounts,
-                "ExposedPorts": configedPortList.inject(new LinkedHashMap<String, Object>()) {
-                    map, it ->
-                        map.put("${it.PrivatePort}/tcp", new LinkedHashMap<String, Object>())
-                        map
-                },
-                "HostConfig"  : [
-                        "Binds"       : mounts.collect {
-                            it ->
-                                "${it.Source}:${it.Destination}"
-                        },
-                        "PortBindings": configedPortList.inject(new LinkedHashMap<String, Object>()) {
-                            map, it ->
-                                map.put("${it.PrivatePort}/tcp", [[
-                                                                          "HostPort": "${it.PublicPort}"
-                                                                  ]])
-                                map
-                        }
-                ]
-        ]
-        logger.info(containerConfig)
-        def response = dClient.createContainer(containerConfig, [name: dockerName])
-        if(response.status.success){
-            dClient.startContainer(response.content.Id)
-        }else{
-            logger.error("create container failed:${dockerName}")
-            logger.error(response)
-        }
-
-
-        /**
-         * 对于每一个ProjectMeta, 进行部署工作
-         */
-
     }
 }
