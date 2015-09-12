@@ -1,8 +1,11 @@
-package com.sankuai.srq.deploy
+package com.sankuai.srq.deploy.script
 
+import com.sankuai.srq.deploy.InstanceConfig
+import com.sankuai.srq.deploy.ProjectMeta
+import com.sankuai.srq.deploy.Tool
 import groovy.json.JsonBuilder
 
-def List<ProjectMeta> readInParametersAndConfig(List<ProjectMeta> pMetaList) {
+def readInParametersAndConfig(List<ProjectMeta> pMetaList) {
     def console = new BufferedReader(new InputStreamReader(System.in))
     def ownerName = console.readLine('please input your name:').trim()
     if (ownerName.isEmpty()) {
@@ -36,9 +39,25 @@ def List<ProjectMeta> readInParametersAndConfig(List<ProjectMeta> pMetaList) {
             }
         }
     }
-    pMetaList
+    [
+            "ownerName": ownerName,
+            "projects" : pMetaList
+    ]
 }
 
-Tool.extendBufferedReader()
-readInParametersAndConfig(InstanceConfig.srqserver)
-println(new JsonBuilder(InstanceConfig.srqserver).toPrettyString())
+/**
+ * 在/tmp/目录下面产生配置文件
+ */
+if (args.size() <= 0) {
+    println("请指定要部署的工程名称.目前支持可部署的工程包括:${InstanceConfig.projectsConfig.keySet()}")
+    System.exit(1)
+}else {
+    Tool.extendBufferedReader()
+    def projectName = args[0]
+    def config = readInParametersAndConfig(InstanceConfig.projectsConfig[projectName])
+    def json = new JsonBuilder(config).toPrettyString()
+    println("部署配置:${json}")
+    def outputFile = new File("/tmp/${projectName}.json")
+    outputFile.delete()
+    outputFile.write(json, "utf-8")
+}
