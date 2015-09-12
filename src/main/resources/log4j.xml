@@ -5,7 +5,7 @@
     <appender name="console" class="org.apache.log4j.ConsoleAppender">
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern"
-                   value="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
+                   value="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n %X{PID}" />
         </layout>
     </appender>
 
@@ -13,10 +13,21 @@
         <param name="append" value="true" />
         <param name="maxFileSize" value="10MB" />
         <param name="maxBackupIndex" value="10" />
+        <param name="file" value="/tmp/logs/all-docker-deploy.log" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern"
+                   value="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n %X{PID}" />
+        </layout>
+    </appender>
+
+    <appender name="deployAppendar" class="org.apache.log4j.RollingFileAppender">
+        <param name="append" value="true" />
+        <param name="maxFileSize" value="10MB" />
+        <param name="maxBackupIndex" value="10" />
         <param name="file" value="/tmp/logs/docker-deploy.log" />
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern"
-                   value="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
+                   value="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n %X{PID}" />
         </layout>
     </appender>
 
@@ -26,4 +37,9 @@
         <appender-ref ref="file" />
     </root>
 
+    <logger name="DeployEngine" additivity="false" >
+        <level value="INFO" />
+        <appender-ref ref="consoleAppender"/>
+        <appender-ref ref="deployAppendar"/>
+    </logger>
 </log4j:configuration>

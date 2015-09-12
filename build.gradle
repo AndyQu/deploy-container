@@ -27,11 +27,10 @@ test {
 }
 
 run {
-//    environment "TERM","dumb"
     classpath = sourceSets.main.runtimeClasspath
     standardInput = java.lang.System.in
-    main = "com.sankuai.srq.deploy.script.${project.getProperty('main')}"
-    args=[project.getProperty("args")]
+    if (project.hasProperty('main')) {
+        main = "com.sankuai.srq.deploy.script.${project.getProperty('main')}"
+        args = [project.getProperty("args")]
+    }
 }
-
-defaultTasks 'run'
