@@ -37,7 +37,7 @@
         <appender-ref ref="file" />
     </root>
 
-    <logger name="DeployEngine" additivity="false" >
+    <logger name="DeployEngine" additivity="true" >
         <level value="INFO" />
         <appender-ref ref="consoleAppender"/>
         <appender-ref ref="deployAppendar"/>
