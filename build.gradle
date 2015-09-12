@@ -31,7 +31,7 @@ run {
     classpath = sourceSets.main.runtimeClasspath
     standardInput = java.lang.System.in
     main = "com.sankuai.srq.deploy.script.${project.getProperty('main')}"
-    args=[project.getProperty("projectName")]
+    args=[project.getProperty("args")]
 }
 
 defaultTasks 'run'
