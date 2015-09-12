@@ -171,6 +171,12 @@ git submodule foreach git checkout ${pMeta.subModuleBranchName}
             pMeta ->
                 _deploy(contextFolderPath, response.content.Id, pMeta as ProjectMeta)
         }
+
+        logger.info("\n\n\n部署完毕.")
+        logger.info("主机IP:${host}")
+        configedPortList.each {
+            logger.info("主机端口:${it.PublicPort}  <->  Docker端口:${it.PrivatePort}")
+        }
     }
 
     /**
