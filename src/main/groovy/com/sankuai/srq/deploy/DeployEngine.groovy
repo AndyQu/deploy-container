@@ -252,9 +252,8 @@ git submodule foreach git checkout ${pMeta.subModuleBranchName}
             volumnSet, pMeta ->
                 if (pMeta.logFolder != null) {
                     if (volumnSet.contains(pMeta.logFolder)) {
-                        def eMsg = "2 project apply for the same log folder:${portMeta.LogFolder}."
-                        logger.error eMsg
-                        throw new Exception(eMsg)
+                        def eMsg = "2 project apply for the same log folder:${pMeta.LogFolder}."
+                        logger.info eMsg
                     } else {
                         volumnSet.add(pMeta.logFolder)
                     }
