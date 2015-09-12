@@ -201,8 +201,7 @@ git submodule foreach git checkout ${pMeta.subModuleBranchName}
                     portMeta ->
                         if (portMeta.port == 8000) {
                             def eMsg = "project ${pMeta.projectName} applies for 8000 port, which is used by Java Debug"
-                            logger.error eMsg
-                            throw new Exception(eMsg)
+                            logger.warn eMsg
                         } else if (portSet.contains(portMeta)) {
                             def eMsg = "2 project apply for the same port:${portMeta.port}."
                             logger.error eMsg
@@ -228,11 +227,18 @@ git submodule foreach git checkout ${pMeta.subModuleBranchName}
         int nextPort = 20000
         List<Object> newPortList = portSet.collect {
             portMeta ->
-                for (nextPort++; Tool.isPortInUse("0.0.0.0", nextPort); nextPort++) {
+                if(portMeta.hostPort>0){
+                    if(Tool.isPortInUse("0.0.0.0",portMeta.hostPort)){
+                        logger.error("申请的目标host端口已经被占用:${portMeta.hostPort}")
+                        System.exit(-1)
+                    }
+                }else {
+                    for (nextPort++; Tool.isPortInUse("0.0.0.0", nextPort); nextPort++) {
+                    }
+                    def p = [IP: '0.0.0.0', PrivatePort: portMeta.port, PublicPort: nextPort, Type: "tcp"] as LazyMap
+                    logger.info("found port:${p}")
+                    p
                 }
-                def p = [IP: '0.0.0.0', PrivatePort: portMeta.port, PublicPort: nextPort, Type: "tcp"] as LazyMap
-                logger.info("found port:${p}")
-                p
         }
         logger.info("[Find available ports]Ends")
         newPortList
