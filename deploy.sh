@@ -19,4 +19,4 @@ config_file=${projectName}_`date "+%Y-%m-%d_%H-%M-%S"`.json
 scp -v /tmp/${projectName}.json root@${host}:/tmp/${config_file}
 echo $?
 #执行部署脚本
-ssh root@${host} "PATH=/opt/soft/gradle-2.4/bin/:$PATH;echo $PATH;cd /root/docker-deploy;git checkout .;git pull;gradle -Pmain=deploy -Pargs=/tmp/${config_file}"
+ssh root@${host} "export JAVA_HOME=/usr/java/jdk1.7.0_79;PATH=/opt/soft/gradle-2.4/bin/:$PATH;echo $PATH;cd /root/docker-deploy;gradle -Pmain=deploy -Pargs=/tmp/${config_file}"
