@@ -18,6 +18,21 @@ class InstanceConfig {
 
                     deployScriptFile: "srq_deploy.sh",
             ),
+            new ProjectMeta(
+                    projectName: "H5",
+                    gitRepoUri:"ssh://git@git.sankuai.com/fe/fe-paidui.git",
+                    gitbranchName: "test",
+
+                    portList: [
+                            ["port": 8080, "description": "node server port"] as PortMeta
+                    ],
+                    needJavaDebugPort: false,
+                    logFolder: "/opt/logs/srq/",
+                    needMountNodeLib: true,
+                    needMountGradleLib: false,
+
+                    deployScriptFile: "h5_deploy.sh",
+            )
     ]
     def static projectsConfig = ['srqserver': srqserver]
 }
