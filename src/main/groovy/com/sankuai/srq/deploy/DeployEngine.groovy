@@ -231,12 +231,16 @@ git submodule foreach git checkout ${pMeta.subModuleBranchName}
                     if(Tool.isPortInUse("0.0.0.0",portMeta.hostPort)){
                         logger.error("申请的目标host端口已经被占用:${portMeta.hostPort}")
                         System.exit(-1)
+                    }else{
+                        def p = [IP: '0.0.0.0', PrivatePort: portMeta.port, PublicPort: portMeta.hostPort, Type: "tcp"] as LazyMap
+                        logger.info("固定端口:${p}")
+                        p
                     }
                 }else {
                     for (nextPort++; Tool.isPortInUse("0.0.0.0", nextPort); nextPort++) {
                     }
                     def p = [IP: '0.0.0.0', PrivatePort: portMeta.port, PublicPort: nextPort, Type: "tcp"] as LazyMap
-                    logger.info("found port:${p}")
+                    logger.info("发现端口:${p}")
                     p
                 }
         }
