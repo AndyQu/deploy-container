@@ -1,11 +1,10 @@
 package com.sankuai.srq.deploy
 
 import groovy.transform.EqualsAndHashCode
-/**
- * Created by andy on 15/9/4.
- */
+import groovy.transform.ToString
+
 class ProjectMeta {
-    def String Name
+    def String ProjectName
     def String GitRepoUri
     def String GitbranchName
     def String SubModuleBranchName
@@ -19,8 +18,11 @@ class ProjectMeta {
 
     def String DeployScriptFile
 }
+
+@ToString
 @EqualsAndHashCode(excludes=["Port"])
 class PortMeta {
     def int Port
+    def int HostPort = -1
     def String Description
 }

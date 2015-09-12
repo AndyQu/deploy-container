@@ -7,9 +7,6 @@ import org.slf4j.Logger
 
 import java.security.MessageDigest
 
-/**
- * Created by andy on 15/9/4.
- */
 class Tool {
     def static generateMD5(String s) {
         MessageDigest digest = MessageDigest.getInstance("MD5")
@@ -49,7 +46,17 @@ class Tool {
                 error(new JsonBuilder(msgObj).toPrettyString())
         }
     }
+
+    def static void extendBufferedReader(){
+        BufferedReader.metaClass.readLine={
+            str->
+                print str
+                readLine()
+        }
+    }
 }
+
+
 
 class DockerTool {
     def static void extendDockerClientImpl(){

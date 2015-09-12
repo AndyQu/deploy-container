@@ -21,7 +21,7 @@
     </appender>
 
     <root>
-        <level value="trace" />
+        <level value="info" />
         <appender-ref ref="console" />
         <appender-ref ref="file" />
     </root>

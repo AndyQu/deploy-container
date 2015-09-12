@@ -10,13 +10,13 @@ class TestDeploy {
     @BeforeTest
     def void setup() {
         queueMeta = new ProjectMeta(
-                Name: "qgc",
+                ProjectName: "qgc",
                 GitRepoUri: "ssh://git@git.sankuai.com/srt/srqserver.git",
                 GitbranchName: "master",
                 SubModuleBranchName: "master",
 
                 PortList:[
-                        ["Port":8080,"Description":"http jetty port"] as PortMeta
+                        ["Port":8088,"Description":"http jetty port"] as PortMeta
                 ],
                 NeedJavaDebugPort: true,
                 LogFolder : "/opt/logs/srq/",

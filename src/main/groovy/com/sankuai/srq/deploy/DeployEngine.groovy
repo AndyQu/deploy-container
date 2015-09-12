@@ -3,7 +3,6 @@ package com.sankuai.srq.deploy
 import de.gesellix.docker.client.DockerClient
 import de.gesellix.docker.client.DockerClientImpl
 import de.gesellix.docker.client.DockerResponse
-import groovy.json.JsonBuilder
 import groovy.json.internal.LazyMap
 import org.slf4j.LoggerFactory
 
@@ -30,7 +29,7 @@ class DeployEngine {
          * 3. 初始化subModule,并且切换到分支:SubModuleBranchName(如果subModuleBranchName为空,则不需要作这一步)
          * 4. deployScriptFile的bash command
          */
-        def deployScriptPath = "${contextFolderPath}/scripts/deploy_${pMeta.Name}.sh"
+        def deployScriptPath = "${contextFolderPath}/scripts/deploy_${pMeta.ProjectName}.sh"
         def deployFile = new File(deployScriptPath)
         deployFile.createNewFile()
         /**
@@ -39,8 +38,8 @@ class DeployEngine {
         deployFile << """
 mkdir -p /src/
 cd /src/
-git clone ${pMeta.GitRepoUri} ${pMeta.Name}
-cd ${pMeta.Name}
+git clone ${pMeta.GitRepoUri} ${pMeta.ProjectName}
+cd ${pMeta.ProjectName}
 git checkout ${pMeta.GitbranchName}
 git pull
 """
@@ -62,7 +61,7 @@ git submodule foreach git checkout ${pMeta.SubModuleBranchName}
                 deployFile << it
             }
         } else {
-            throw new Exception("${pMeta.Name} 没有指定文件DeployScriptFile")
+            throw new Exception("${pMeta.ProjectName} 没有指定文件DeployScriptFile")
         }
 
         /**
@@ -70,7 +69,7 @@ git submodule foreach git checkout ${pMeta.SubModuleBranchName}
          */
         DockerResponse response = dClient.exec(
                 containerId,
-                ['/bin/bash', '/scripts/deploy_${pMeta.Name}.sh'],
+                ['/bin/bash', "/scripts/deploy_${pMeta.ProjectName}.sh"],
                 [
                         "Detach"     : false,
                         "AttachStdin": false,
@@ -200,7 +199,7 @@ git submodule foreach git checkout ${pMeta.SubModuleBranchName}
                 pMeta.PortList.each {
                     portMeta ->
                         if (portMeta.Port == 8000) {
-                            def eMsg = "project ${pMeta.Name} applies for 8000 port, which is used by Java Debug"
+                            def eMsg = "project ${pMeta.ProjectName} applies for 8000 port, which is used by Java Debug"
                             logger.error eMsg
                             throw new Exception(eMsg)
                         } else if (portSet.contains(portMeta)) {
@@ -208,7 +207,7 @@ git submodule foreach git checkout ${pMeta.SubModuleBranchName}
                             logger.error eMsg
                             throw new Exception(eMsg)
                         } else {
-                            logger.info("collect port from project ${pMeta.Name}: ${portMeta}")
+                            logger.info("collect port from project ${pMeta.ProjectName}: ${portMeta}")
                             portSet.add(portMeta)
                         }
                 }
