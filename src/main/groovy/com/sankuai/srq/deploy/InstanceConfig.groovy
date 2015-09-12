@@ -9,7 +9,7 @@ class InstanceConfig {
                     subModuleBranchName: "master",
 
                     portList: [
-                            ["Port": 8088, "Description": "http jetty port"] as PortMeta
+                            ["port": 8088, "description": "http jetty port"] as PortMeta
                     ],
                     needJavaDebugPort: true,
                     logFolder: "/opt/logs/srq/",

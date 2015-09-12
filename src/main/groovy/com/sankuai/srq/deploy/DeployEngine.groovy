@@ -305,12 +305,16 @@ git submodule foreach git checkout ${pMeta.subModuleBranchName}
      */
     def static buildContextFolder(contextDir, subFolders) {
         def contextFile = new File(contextDir)
-        contextFile.deleteDir()
-        contextFile.mkdirs()
+        logger.info("删除文件夹:${contextDir}")
+        logger.info(contextFile.deleteDir())
+        logger.info("创建文件夹:${contextDir}")
+        logger.info(contextFile.mkdirs())
         subFolders.each {
             path ->
-                def ret = new File("${contextDir}/" + path.split("/").last()).mkdirs()
-                println ret
+                def subpath = "${contextDir}/" + path.split("/").last()
+                logger.info("\t创建子文件夹:${subpath}")
+                logger.info(new File(subpath).mkdirs())
+
         }
     }
 }
