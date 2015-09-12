@@ -57,7 +57,7 @@ git submodule foreach git checkout ${pMeta.SubModuleBranchName}
          * 个性化部署脚本
          */
         if (pMeta.DeployScriptFile != null) {
-            new File(pMeta.DeployScriptFile).withReader {
+            DeployEngine.class.getResource("/${pMeta.DeployScriptFile}").withReader {
                 deployFile << it
             }
         } else {
@@ -157,6 +157,7 @@ git submodule foreach git checkout ${pMeta.SubModuleBranchName}
         def response = dClient.createContainer(containerConfig, [name: dockerName])
         if (response.status.success) {
             dClient.startContainer(response.content.Id)
+            logger.info("创建并启动container成功")
         } else {
             logger.error("创建container失败:${dockerName}. 返回信息如下:")
             logger.error(response)
@@ -168,7 +169,7 @@ git submodule foreach git checkout ${pMeta.SubModuleBranchName}
          */
         pMetaList.each {
             pMeta ->
-                _deploy(contextFolderPath, response.content.Id, pMeta)
+                _deploy(contextFolderPath, response.content.Id, pMeta as ProjectMeta)
         }
     }
 
