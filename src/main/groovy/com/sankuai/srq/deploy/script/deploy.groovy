@@ -2,6 +2,7 @@ package com.sankuai.srq.deploy.script
 import com.sankuai.srq.deploy.DeployEngine
 import com.sankuai.srq.deploy.ProjectMeta
 import groovy.json.JsonSlurper
+import org.slf4j.MDC
 
 import java.lang.management.ManagementFactory
 import java.lang.management.RuntimeMXBean
