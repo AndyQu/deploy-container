@@ -29,7 +29,7 @@ class DeployEngine {
          * 3. 初始化subModule,并且切换到分支:SubModuleBranchName(如果subModuleBranchName为空,则不需要作这一步)
          * 4. deployScriptFile的bash command
          */
-        def deployScriptPath = "${contextFolderPath}/scripts/deploy_${pMeta.ProjectName}.sh"
+        def deployScriptPath = "${contextFolderPath}/scripts/deploy_${pMeta.projectName}.sh"
         def deployFile = new File(deployScriptPath)
         deployFile.createNewFile()
         /**
@@ -38,30 +38,30 @@ class DeployEngine {
         deployFile << """
 mkdir -p /src/
 cd /src/
-git clone ${pMeta.GitRepoUri} ${pMeta.ProjectName}
-cd ${pMeta.ProjectName}
-git checkout ${pMeta.GitbranchName}
+git clone ${pMeta.gitRepoUri} ${pMeta.projectName}
+cd ${pMeta.projectName}
+git checkout ${pMeta.gitbranchName}
 git pull
 """
         /**
          * 拉取子工程代码
          */
-        if (pMeta.SubModuleBranchName != null) {
+        if (pMeta.subModuleBranchName != null) {
             deployFile << """
 git submodule init
 git submodule update
-git submodule foreach git checkout ${pMeta.SubModuleBranchName}
+git submodule foreach git checkout ${pMeta.subModuleBranchName}
 """
         }
         /**
          * 个性化部署脚本
          */
-        if (pMeta.DeployScriptFile != null) {
-            DeployEngine.class.getResource("/${pMeta.DeployScriptFile}").withReader {
+        if (pMeta.deployScriptFile != null) {
+            DeployEngine.class.getResource("/${pMeta.deployScriptFile}").withReader {
                 deployFile << it
             }
         } else {
-            throw new Exception("${pMeta.ProjectName} 没有指定文件DeployScriptFile")
+            throw new Exception("${pMeta.projectName} 没有指定文件DeployScriptFile")
         }
 
         /**
@@ -69,7 +69,7 @@ git submodule foreach git checkout ${pMeta.SubModuleBranchName}
          */
         DockerResponse response = dClient.exec(
                 containerId,
-                ['/bin/bash', "/scripts/deploy_${pMeta.ProjectName}.sh"],
+                ['/bin/bash', "/scripts/deploy_${pMeta.projectName}.sh"],
                 [
                         "Detach"     : false,
                         "AttachStdin": false,
@@ -88,7 +88,7 @@ git submodule foreach git checkout ${pMeta.SubModuleBranchName}
          * */
         String dockerName = "${ownerName}-" + Tool.generateMD5(pMetaList.collect {
             pMeta ->
-                pMeta.GitbranchName
+                pMeta.gitbranchName
         }.join("-"))
         contextFolderPath = "/docker-deploy/${dockerName}/"
 
@@ -197,28 +197,28 @@ git submodule foreach git checkout ${pMeta.SubModuleBranchName}
         logger.info("[Collects Ports]Begins")
         Set<PortMeta> portSet = pMetaList.inject(new HashSet<PortMeta>()) {
             portSet, pMeta ->
-                pMeta.PortList.each {
+                pMeta.portList.each {
                     portMeta ->
-                        if (portMeta.Port == 8000) {
-                            def eMsg = "project ${pMeta.ProjectName} applies for 8000 port, which is used by Java Debug"
+                        if (portMeta.port == 8000) {
+                            def eMsg = "project ${pMeta.projectName} applies for 8000 port, which is used by Java Debug"
                             logger.error eMsg
                             throw new Exception(eMsg)
                         } else if (portSet.contains(portMeta)) {
-                            def eMsg = "2 project apply for the same port:${portMeta.Port}."
+                            def eMsg = "2 project apply for the same port:${portMeta.port}."
                             logger.error eMsg
                             throw new Exception(eMsg)
                         } else {
-                            logger.info("collect port from project ${pMeta.ProjectName}: ${portMeta}")
+                            logger.info("collect port from project ${pMeta.projectName}: ${portMeta}")
                             portSet.add(portMeta)
                         }
                 }
                 portSet
         }
         Boolean needDebugPort = pMetaList.inject(false) {
-            needDebugPort, it -> needDebugPort || it.NeedJavaDebugPort
+            needDebugPort, it -> needDebugPort || it.needJavaDebugPort
         }
         if (needDebugPort) {
-            portSet.add(new PortMeta(Port: 8000, Description: "Java Debug Port"))
+            portSet.add(new PortMeta(port: 8000, description: "Java Debug Port"))
         }
         logger.info("[Collects Ports]Ends")
         /**
@@ -230,7 +230,7 @@ git submodule foreach git checkout ${pMeta.SubModuleBranchName}
             portMeta ->
                 for (nextPort++; Tool.isPortInUse("0.0.0.0", nextPort); nextPort++) {
                 }
-                def p = [IP: '0.0.0.0', PrivatePort: portMeta.Port, PublicPort: nextPort, Type: "tcp"] as LazyMap
+                def p = [IP: '0.0.0.0', PrivatePort: portMeta.port, PublicPort: nextPort, Type: "tcp"] as LazyMap
                 logger.info("found port:${p}")
                 p
         }
@@ -250,13 +250,13 @@ git submodule foreach git checkout ${pMeta.SubModuleBranchName}
     def static calcMountPoints(List<ProjectMeta> pMetaList, dockerName, contextFolderPath) {
         Set<String> containerInnerVolumnSet = pMetaList.inject(new HashSet<>()) {
             volumnSet, pMeta ->
-                if (pMeta.LogFolder != null) {
-                    if (volumnSet.contains(pMeta.LogFolder)) {
+                if (pMeta.logFolder != null) {
+                    if (volumnSet.contains(pMeta.logFolder)) {
                         def eMsg = "2 project apply for the same log folder:${portMeta.LogFolder}."
                         logger.error eMsg
                         throw new Exception(eMsg)
                     } else {
-                        volumnSet.add(pMeta.LogFolder)
+                        volumnSet.add(pMeta.logFolder)
                     }
                 }
                 volumnSet
@@ -271,14 +271,14 @@ git submodule foreach git checkout ${pMeta.SubModuleBranchName}
                         "RW"         : true
                 ]
         }
-        if (pMetaList.find { pMeta -> pMeta.NeedMountNodeLib }) {
+        if (pMetaList.find { pMeta -> pMeta.needMountNodeLib }) {
             mounts.add([
                     "Source"     : "/home/sankuai/fe-paidui/node_modules/",
                     "Destination": "/src/node_modules/",
                     "RW"         : true
             ])
         }
-        if (pMetaList.find { pMeta -> pMeta.NeedMountGradleLib }) {
+        if (pMetaList.find { pMeta -> pMeta.needMountGradleLib }) {
             mounts.add(
                     [
                             "Source"     : "/home/sankuai/.gradle/",

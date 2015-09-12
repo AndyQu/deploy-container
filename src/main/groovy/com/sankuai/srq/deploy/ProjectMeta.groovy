@@ -4,25 +4,25 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 
 class ProjectMeta {
-    def String ProjectName
-    def String GitRepoUri
-    def String GitbranchName
-    def String SubModuleBranchName
+    def String projectName
+    def String gitRepoUri
+    def String gitbranchName
+    def String subModuleBranchName
 
-    def List<PortMeta> PortList
-    def Boolean NeedJavaDebugPort
+    def List<PortMeta> portList
+    def Boolean needJavaDebugPort
 
-    def String LogFolder
-    def Boolean NeedMountNodeLib =false
-    def Boolean NeedMountGradleLib =true
+    def String logFolder
+    def Boolean needMountNodeLib =false
+    def Boolean needMountGradleLib =true
 
-    def String DeployScriptFile
+    def String deployScriptFile
 }
 
 @ToString
 @EqualsAndHashCode(excludes=["Port"])
 class PortMeta {
-    def int Port
-    def int HostPort = -1
-    def String Description
+    def int port
+    def int hostPort = -1
+    def String description
 }

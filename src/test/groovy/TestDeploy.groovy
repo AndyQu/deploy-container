@@ -10,20 +10,20 @@ class TestDeploy {
     @BeforeTest
     def void setup() {
         queueMeta = new ProjectMeta(
-                ProjectName: "qgc",
-                GitRepoUri: "ssh://git@git.sankuai.com/srt/srqserver.git",
-                GitbranchName: "master",
-                SubModuleBranchName: "master",
+                projectName: "qgc",
+                gitRepoUri: "ssh://git@git.sankuai.com/srt/srqserver.git",
+                gitbranchName: "master",
+                subModuleBranchName: "master",
 
-                PortList:[
+                portList:[
                         ["Port":8088,"Description":"http jetty port"] as PortMeta
                 ],
-                NeedJavaDebugPort: true,
-                LogFolder : "/opt/logs/srq/",
-                NeedMountNodeLib: true,
-                NeedMountGradleLib: true,
+                needJavaDebugPort: true,
+                logFolder: "/opt/logs/srq/",
+                needMountNodeLib: true,
+                needMountGradleLib: true,
 
-                DeployScriptFile:"/tmp/queue.sh",
+                deployScriptFile:"/tmp/queue.sh",
         )
 
     }

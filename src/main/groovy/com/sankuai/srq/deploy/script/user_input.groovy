@@ -13,28 +13,28 @@ def readInParametersAndConfig(List<ProjectMeta> pMetaList) {
         System.exit(1)
     }
     pMetaList.each {
-        def majorBranchName = console.readLine("${it.ProjectName} branch name:").trim()
+        def majorBranchName = console.readLine("${it.projectName} branch name:").trim()
         if (majorBranchName.isEmpty()) {
             majorBranchName = "dev"
         }
 
         def subBranchName = null
-        if (it.SubModuleBranchName != null) {
-            subBranchName = console.readLine("${it.ProjectName} sub module branch name:").trim()
+        if (it.subModuleBranchName != null) {
+            subBranchName = console.readLine("${it.projectName} sub module branch name:").trim()
             if (subBranchName.isEmpty()) {
                 subBranchName = "dev"
             }
         }
 
-        it.GitbranchName = majorBranchName
-        it.SubModuleBranchName = subBranchName
+        it.gitbranchName = majorBranchName
+        it.subModuleBranchName = subBranchName
 
         if (console.readLine("Do you want to change port configuration(y/n,default no)?").trim().equalsIgnoreCase("y")) {
-            it.PortList.each {
+            it.portList.each {
                 portMeta ->
                     println "For port: \n\t${portMeta}(-1 means randomly map a host port)"
-                    if (console.readLine("\tAssign the same host port(mapping to host port ${portMeta.Port})(y/n):").trim().equalsIgnoreCase("y")) {
-                        portMeta.HostPort = portMeta.Port
+                    if (console.readLine("\tAssign the same host port(mapping to host port ${portMeta.port})(y/n):").trim().equalsIgnoreCase("y")) {
+                        portMeta.hostPort = portMeta.port
                     }
             }
         }
