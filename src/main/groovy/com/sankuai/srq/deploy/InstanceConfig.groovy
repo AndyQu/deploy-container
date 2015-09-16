@@ -66,11 +66,29 @@ class InstanceConfig {
             deployScriptFile: "jxc_deploy.sh",
     )
 
+    static ProjectMeta fastFood=new ProjectMeta(
+            projectName: "Fast-Food",
+            gitRepoUri: "ssh://git@git.sankuai.com/srt/srcms.git",
+            gitbranchName: "dev",
+
+            portList: [
+                    ["port": 8088, "description": "jxc server port"] as PortMeta,
+                    ["port": 9103, "description":"thrift port", hostPort:9103] as PortMeta
+            ],
+            needJavaDebugPort: false,
+            logFolder: "/opt/logs/srq/",
+            needMountNodeLib: false,
+            needMountGradleLib: true,
+
+            deployScriptFile: "srcms_deploy.sh",
+    )
+
     def static projectsConfig = [
             'srqserver'   : [srqserver],
             'h5':[h5],
             'crm':[crm],
             'jxc':[jxc],
+            'srcms':[fastFood],
             'srqserver_h5': [srqserver, h5]
     ]
 }

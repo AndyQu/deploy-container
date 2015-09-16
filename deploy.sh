@@ -1,6 +1,6 @@
 #!/bin/bash
 if [ $# -lt 1 ]; then
-    echo "请指定要部署的工程名称. 目前可部署的工程包括:srqserver"
+    echo "请指定要部署的工程名称. 目前可部署的工程包括:srqserver,h5,crm,jxc,srcms,srqserver_h5"
     exit 1
 fi
 projectName=$1
