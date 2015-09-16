@@ -33,9 +33,26 @@ class InstanceConfig {
             deployScriptFile: "h5_deploy.sh",
     )
 
+    static ProjectMeta crm=new ProjectMeta(
+            projectName: "CRM",
+            gitRepoUri: "ssh://git@git.sankuai.com/srt/srcrmserver.git",
+            gitbranchName: "dev",
+
+            portList: [
+                    ["port": 8088, "description": "crm server port"] as PortMeta
+            ],
+            needJavaDebugPort: false,
+            logFolder: "/opt/logs/srq/",
+            needMountNodeLib: false,
+            needMountGradleLib: true,
+
+            deployScriptFile: "crm_deploy.sh",
+    )
+
     def static projectsConfig = [
             'srqserver'   : [srqserver],
             'h5':[h5],
+            'crm':[crm],
             'srqserver_h5': [srqserver, h5]
     ]
 }
