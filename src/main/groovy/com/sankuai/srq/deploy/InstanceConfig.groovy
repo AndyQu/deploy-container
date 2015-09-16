@@ -4,8 +4,8 @@ class InstanceConfig {
     static ProjectMeta srqserver = new ProjectMeta(
             projectName: "srqserver",
             gitRepoUri: "ssh://git@git.sankuai.com/srt/srqserver.git",
-            gitbranchName: "master",
-            subModuleBranchName: "master",
+            gitbranchName: "dev",
+            subModuleBranchName: "dev",
 
             portList: [
                     ["port": 8088, "description": "http jetty port"] as PortMeta
@@ -37,6 +37,7 @@ class InstanceConfig {
             projectName: "CRM",
             gitRepoUri: "ssh://git@git.sankuai.com/srt/srcrmserver.git",
             gitbranchName: "dev",
+            subModuleBranchName: "dev",
 
             portList: [
                     ["port": 8088, "description": "crm server port"] as PortMeta
