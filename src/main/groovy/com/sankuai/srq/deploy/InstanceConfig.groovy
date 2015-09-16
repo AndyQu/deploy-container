@@ -20,7 +20,7 @@ class InstanceConfig {
             ),
             new ProjectMeta(
                     projectName: "H5",
-                    gitRepoUri:"ssh://git@git.sankuai.com/fe/fe-paidui.git",
+                    gitRepoUri: "ssh://git@git.sankuai.com/fe/fe-paidui.git",
                     gitbranchName: "test",
 
                     portList: [
@@ -33,6 +33,11 @@ class InstanceConfig {
 
                     deployScriptFile: "h5_deploy.sh",
             )
+    ]
+    static List<ProjectMeta> crmserver = [
+            new ProjectMeta(
+
+            ),
     ]
     def static projectsConfig = ['srqserver': srqserver]
 }

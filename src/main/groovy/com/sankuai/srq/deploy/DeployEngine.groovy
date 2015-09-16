@@ -67,6 +67,7 @@ git submodule foreach git checkout ${pMeta.subModuleBranchName}
         /**
          * 使用docker exec API接口, 执行自动产生的bash脚本
          */
+        long startT=System.currentTimeMillis();
         DockerResponse response = dClient.exec(
                 containerId,
                 ['/bin/bash', "/scripts/deploy_${pMeta.projectName}.sh"],
@@ -77,6 +78,8 @@ git submodule foreach git checkout ${pMeta.subModuleBranchName}
                 ]
         )
         logger.info(response.stream.text)
+        long endT=System.currentTimeMillis();
+        logger.info("[Time Cost] ${endT-startT}ms")
     }
 
     def deploy(String ownerName, List<ProjectMeta> pMetaList) {
