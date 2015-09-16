@@ -15,10 +15,10 @@ class DeployEngine {
     def DockerClient dClient
     def String host
 
-    def DeployEngine(String dockerHost) {
+    def DeployEngine(String dockerHost, int port) {
         //'http://172.27.2.94:4243'
         host = dockerHost
-        dClient = new DockerClientImpl(dockerHost: dockerHost,)
+        dClient = new DockerClientImpl(dockerHost: "${dockerHost}:${port}",)
     }
 
     def _deploy(String contextFolderPath, String containerId, ProjectMeta pMeta) {
