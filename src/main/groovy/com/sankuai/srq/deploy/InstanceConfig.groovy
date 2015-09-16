@@ -50,10 +50,27 @@ class InstanceConfig {
             deployScriptFile: "crm_deploy.sh",
     )
 
+    static ProjectMeta jxc=new ProjectMeta(
+            projectName: "JXC",
+            gitRepoUri: "ssh://git@git.sankuai.com/srt/jxc.git",
+            gitbranchName: "dev",
+
+            portList: [
+                    ["port": 8088, "description": "jxc server port"] as PortMeta
+            ],
+            needJavaDebugPort: false,
+            logFolder: "/opt/logs/srq/",
+            needMountNodeLib: false,
+            needMountGradleLib: true,
+
+            deployScriptFile: "jxc_deploy.sh",
+    )
+
     def static projectsConfig = [
             'srqserver'   : [srqserver],
             'h5':[h5],
             'crm':[crm],
+            'jxc':[jxc],
             'srqserver_h5': [srqserver, h5]
     ]
 }
