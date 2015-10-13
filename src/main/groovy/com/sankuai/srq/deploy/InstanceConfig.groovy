@@ -128,6 +128,7 @@ class InstanceConfig {
             'jxc':[jxc],
             'srcms':[fastFood],
             'srqserver_h5': [srqserver, h5],
-			'srcos':[srcos]
+			'srcos':[srcos],
+            'srsupplychain':[srsupplychain]
     ]
 }
