@@ -132,7 +132,7 @@ git submodule foreach git checkout ${pMeta.subModuleBranchName}
          */
         def containerConfig = [
                 "Cmd"         : ["/sbin/init"],
-                "Image"       : "srq/ubuntu:1.0",
+                "Image"       : "srq/ubuntu:1.1",
                 "Mounts"      : allMountPoints,
                 "ExposedPorts": configedPortList.inject(new LinkedHashMap<String, Object>()) {
                     map, it ->
