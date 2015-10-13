@@ -82,6 +82,25 @@ class InstanceConfig {
 
             deployScriptFile: "srcms_deploy.sh",
     )
+	static ProjectMeta srcos=new ProjectMeta(
+		projectName: "srcos",                                         //项目名称
+		gitRepoUri: "ssh://git@git.sankuai.com/srt/srcosserver.git",        //项目git repo url
+		gitbranchName: "dev",                                         //默认branch名称，在部署时还会提示用户输入
+		//subModuleBranchName: "",                                       //有子工程则填写，没有则不需要填写
+		portList: [//所需要的端口列表
+			[
+				"port": 8089,                         //端口号
+				"description": "http jetty port"    //端口描述
+			] as PortMeta
+		],
+		needJavaDebugPort: true,            //是否需要打开远程调试端口
+		logFolder: "/opt/logs/srcos/",      //输入日志的文件夹
+		needMountNodeLib: false,            //是否需要加载node.js库（非node工程都填false）
+		needMountGradleLib: true,           //是否需要加载gradle库（gradle工程都填true）
+		
+		deployScriptFile: "srcos_deploy.sh",
+	)
+	
 
     def static projectsConfig = [
             'srqserver'   : [srqserver],
@@ -89,6 +108,7 @@ class InstanceConfig {
             'crm':[crm],
             'jxc':[jxc],
             'srcms':[fastFood],
-            'srqserver_h5': [srqserver, h5]
+            'srqserver_h5': [srqserver, h5],
+			'srcos':[srcos]
     ]
 }

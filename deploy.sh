@@ -1,5 +1,5 @@
 #!/bin/bash
-projects=(srqserver h5 crm jxc srcms srqserver_h5)
+projects=(srqserver h5 crm jxc srcms srqserver_h5 srcos)
 function help {
     echo "可以部署的项目如下:"
     for project in ${projects[@]}; do
