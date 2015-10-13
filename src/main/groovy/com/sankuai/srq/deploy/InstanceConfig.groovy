@@ -89,7 +89,7 @@ class InstanceConfig {
 		//subModuleBranchName: "",                                       //有子工程则填写，没有则不需要填写
 		portList: [//所需要的端口列表
 			[
-				"port": 8089,                         //端口号
+				"port": 8088,                         //端口号
 				"description": "http jetty port"    //端口描述
 			] as PortMeta
 		],
