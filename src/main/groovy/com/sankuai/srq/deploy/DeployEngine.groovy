@@ -89,10 +89,17 @@ git submodule foreach git checkout ${pMeta.subModuleBranchName}
          * 根据分支名称,产生md5,与ownerName一起作为docker的名称
          *
          * */
-        String dockerName = "${ownerName}-" + Tool.generateMD5(pMetaList.collect {
-            pMeta ->
-                pMeta.gitbranchName
-        }.join("-"))
+        String dockerName = "${ownerName}-" + Tool.generateMD5(
+			pMetaList.collect(){
+				pMeta->pMeta.projectName
+			}.join("-")
+			+
+			"_"
+			+
+			pMetaList.collect {
+				pMeta ->pMeta.gitbranchName
+			}.join("-")
+		)
         contextFolderPath = "/docker-deploy/${dockerName}/"
 
         /**
