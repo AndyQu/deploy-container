@@ -6,4 +6,4 @@ echo 'export PATH=$PATH:/usr/local/bin' >> ~/.bashrc
 npm config set registry http://r.npm.sankuai.com
 
 npm install
-npm run-script test
+npm run start
