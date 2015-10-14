@@ -120,6 +120,24 @@ class InstanceConfig {
         deployScriptFile: "srsupplychain_deploy.sh",
     )
 	
+	static ProjectMeta fe_paidui_crm=new ProjectMeta(
+		projectName: "fe-paidui-crm",                                         //项目名称
+		gitRepoUri: "ssh://git@git.sankuai.com/fe/fe-paidui-crm.git",        //项目git repo url
+		gitbranchName: "master",                                         //默认branch名称，在部署时还会提示用户输入
+		portList: [//所需要的端口列表
+		   [
+			   "port": 8080,                         //端口号。docker内部jetty http端口目前固定为8088，暂时不要指定为其他数值
+			   "description": "http node port"    //端口描述
+		   ] as PortMeta
+		],
+		needJavaDebugPort: false,            //是否需要打开远程调试端口
+		logFolder: "/var/sankuai/logs/paidui-crm/",      //输入日志的文件夹
+		needMountNodeLib: true,            //是否需要加载node.js库（非node工程都填false）
+		needMountGradleLib: false,           //是否需要加载gradle库（gradle工程都填true）
+		
+		deployScriptFile: "fe-paidui-crm_deploy.sh",
+	)
+	
 
     def static projectsConfig = [
             'srqserver'   : [srqserver],
@@ -129,6 +147,7 @@ class InstanceConfig {
             'srcms':[fastFood],
             'srqserver_h5': [srqserver, h5],
 			'srcos':[srcos],
-            'srsupplychain':[srsupplychain]
+            'srsupplychain':[srsupplychain],
+			'fe-paidui-crm':[fe_paidui_crm,crm],
     ]
 }
