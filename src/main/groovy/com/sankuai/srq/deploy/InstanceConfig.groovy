@@ -148,6 +148,7 @@ class InstanceConfig {
             'srqserver_h5': [srqserver, h5],
 			'srcos':[srcos],
             'srsupplychain':[srsupplychain],
-			'fe-paidui-crm':[fe_paidui_crm,crm],
+			'fe-paidui-crm_crm':[fe_paidui_crm,crm],
+			'fe-paidui-crm':[fe_paidui_crm]
     ]
 }
