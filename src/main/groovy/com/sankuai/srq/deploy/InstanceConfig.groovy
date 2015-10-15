@@ -131,7 +131,7 @@ class InstanceConfig {
 		   ] as PortMeta
 		],
 		needJavaDebugPort: false,            //是否需要打开远程调试端口
-		logFolder: "/var/sankuai/logs/paidui-crm/",      //输入日志的文件夹
+		logFolder: "/var/sankuai/logs/fe-paidui-crm/",      //输入日志的文件夹
 		needMountNodeLib: true,            //是否需要加载node.js库（非node工程都填false）
 		needMountGradleLib: false,           //是否需要加载gradle库（gradle工程都填true）
 		
