@@ -274,10 +274,11 @@ git submodule foreach git checkout ${pMeta.subModuleBranchName}
 						}
 						break
 					}
+					
                     def p = [IP: '0.0.0.0', PrivatePort: portMeta.port, PublicPort: nextPort, Type: "tcp"] as LazyMap
+					logger.info("发现端口:${p}")
 					nextPort++
 					logger.info("下一个端口:${nextPort}")
-                    logger.info("发现端口:${p}")
                     p
                 }
         }
