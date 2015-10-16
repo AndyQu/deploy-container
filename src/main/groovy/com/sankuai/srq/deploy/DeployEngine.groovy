@@ -261,20 +261,23 @@ git submodule foreach git checkout ${pMeta.subModuleBranchName}
                     }
                 }else {
 					while(true){
+						boolean inUse=false
 						if(Tool.isPortInUse("0.0.0.0", nextPort)){
 							logger.info("端口:${nextPort} 正在被系统使用")
-							nextPort++
-							logger.info("下一个端口:${nextPort}")
-							continue
+							inUse=true
 						}
 						if(allContainerPorts.contains(nextPort)){
 							logger.info("端口:${nextPort} 被某个Docker Container占有")
-							logger.info("下一个端口:${nextPort}")
-							nextPort++
+							inUse=true
 						}
-						break
+						if(inUse){
+							nextPort++
+							logger.info("下一个端口:${nextPort}")
+							continue
+						}else{
+							break
+						}
 					}
-					
                     def p = [IP: '0.0.0.0', PrivatePort: portMeta.port, PublicPort: nextPort, Type: "tcp"] as LazyMap
 					logger.info("发现端口:${p}")
 					nextPort++
