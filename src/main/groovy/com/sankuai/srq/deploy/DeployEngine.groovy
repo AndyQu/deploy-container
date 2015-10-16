@@ -166,8 +166,14 @@ git submodule foreach git checkout ${pMeta.subModuleBranchName}
         logger.info(containerConfig)
         def response = dClient.createContainer(containerConfig, [name: dockerName])
         if (response.status.success) {
-            dClient.startContainer(response.content.Id)
-            logger.info("创建并启动container成功:${response}")
+			logger.info "创建container成功:${response.content.Id}"
+            response = dClient.startContainer(response.content.Id)
+			if(response.status.success){
+				logger.info("启动container成功:${response.content.Id}")
+			}else{
+				logger.error("event_name=启动container失败 response=${response}")
+				System.exit(1)
+			}
         } else {
             logger.error("创建container失败:${dockerName}. 返回信息如下:")
             logger.error(response)
