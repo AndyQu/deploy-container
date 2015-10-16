@@ -169,7 +169,7 @@ git submodule foreach git checkout ${pMeta.subModuleBranchName}
 			logger.info "创建container成功:${response.content.Id}"
             response = dClient.startContainer(response.content.Id)
 			if(response.status.success){
-				logger.info("启动container成功:${response.content.Id}")
+				logger.info("启动container成功:${response}")
 			}else{
 				logger.error("event_name=启动container失败 response=${response}")
 				System.exit(1)
@@ -259,13 +259,23 @@ git submodule foreach git checkout ${pMeta.subModuleBranchName}
                         p
                     }
                 }else {
-					while(Tool.isPortInUse("0.0.0.0", nextPort) || allContainerPorts.contains(nextPort) ){
-						logger.info("端口:${nextPort} 正在被使用")
-						nextPort++
-						logger.info("下一个端口:${nextPort}")
+					while(true){
+						if(Tool.isPortInUse("0.0.0.0", nextPort)){
+							logger.info("端口:${nextPort} 正在被系统使用")
+							nextPort++
+							logger.info("下一个端口:${nextPort}")
+							continue
+						}
+						if(allContainerPorts.contains(nextPort)){
+							logger.info("端口:${nextPort} 被某个Docker Container占有")
+							logger.info("下一个端口:${nextPort}")
+							nextPort++
+						}
+						break
 					}
                     def p = [IP: '0.0.0.0', PrivatePort: portMeta.port, PublicPort: nextPort, Type: "tcp"] as LazyMap
 					nextPort++
+					logger.info("下一个端口:${nextPort}")
                     logger.info("发现端口:${p}")
                     p
                 }
