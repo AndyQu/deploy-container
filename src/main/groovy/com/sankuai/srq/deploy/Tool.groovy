@@ -62,6 +62,7 @@ class DockerTool {
     def static void extendDockerClientImpl(){
         addQueryContainerName()
         addStopAndRemoveContainer()
+		addQueryAllContainerPorts()
     }
     def static void addQueryContainerName() {
         DockerClientImpl.metaClass.queryContainerName = {
