@@ -113,7 +113,7 @@ git submodule foreach git checkout ${pMeta.subModuleBranchName}
             logger.info("docker container ${dockerName} 已存在. 使用它已申请的端口")
             configedPortList = queryExistingPorts(dClient, container)
         } else {
-            configedPortList = allocateNewPorts(pMetaList)
+            configedPortList = allocateNewPorts(pMetaList, dClient.queryAllContainerPorts())
         }
 
         /**
@@ -212,7 +212,7 @@ git submodule foreach git checkout ${pMeta.subModuleBranchName}
      * @param pMetaList
      * @return
      */
-    def static List<Object> allocateNewPorts(List<ProjectMeta> pMetaList) {
+    def static List<Object> allocateNewPorts(List<ProjectMeta> pMetaList, List<Integer> allContainerPorts) {
         /**
          * 搜集所有需要被映射的端口
          */
@@ -259,7 +259,7 @@ git submodule foreach git checkout ${pMeta.subModuleBranchName}
                         p
                     }
                 }else {
-					while(Tool.isPortInUse("0.0.0.0", nextPort)){
+					while(Tool.isPortInUse("0.0.0.0", nextPort) || allContainerPorts.contains(nextPort) ){
 						logger.info("端口:${nextPort} 正在被使用")
 						nextPort++
 						logger.info("下一个端口:${nextPort}")

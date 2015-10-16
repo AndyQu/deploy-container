@@ -104,4 +104,22 @@ class DockerTool {
                 }
         }
     }
+	
+	def static void addQueryAllContainerPorts() {
+		DockerClientImpl.metaClass.queryAllContainerPorts = {
+			DockerResponse response = ps(query: [all: true, size: true])
+			if (response.status.success) {
+				response.content.collect {
+					container->
+						container.Ports.collect {
+							portConf->
+								portConf.PublicPort
+						}
+				}.flatten()
+			}else{
+				logger.error "event_name=ps-all-containers-fail response=${response}"
+				[]
+			}
+		}
+	}
 }
