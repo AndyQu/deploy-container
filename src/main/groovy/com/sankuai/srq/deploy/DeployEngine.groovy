@@ -165,11 +165,12 @@ git submodule foreach git checkout ${pMeta.subModuleBranchName}
         logger.info("将要创建的container信息:")
         logger.info(containerConfig)
         def response = dClient.createContainer(containerConfig, [name: dockerName])
+		def containerId = response.content.Id
         if (response.status.success) {
-			logger.info "创建container成功:${response.content.Id}"
-            response = dClient.startContainer(response.content.Id)
+			logger.info "创建container成功:${containerId}"
+            response = dClient.startContainer(containerId)
 			if(response.status.success){
-				logger.info("启动container成功:${response}")
+				logger.info("启动container成功:${containerId}")
 			}else{
 				logger.error("event_name=启动container失败 response=${response}")
 				System.exit(1)
@@ -185,7 +186,7 @@ git submodule foreach git checkout ${pMeta.subModuleBranchName}
          */
         pMetaList.each {
             pMeta ->
-                _deploy(contextFolderPath, response.content.Id, pMeta as ProjectMeta)
+                _deploy(contextFolderPath, containerId, pMeta as ProjectMeta)
         }
 
         logger.info("\n\n\n部署完毕.")
