@@ -138,6 +138,24 @@ class InstanceConfig {
 		deployScriptFile: "fe-paidui-crm_deploy.sh",
 	)
 	
+	static ProjectMeta srtable=new ProjectMeta(
+		projectName: "srtable",                                         //项目名称
+		gitRepoUri: "ssh://git@git.sankuai.com/srt/srtablemanagement.git",        //项目git repo url
+		gitbranchName: "dev",                                         //默认branch名称，在部署时还会提示用户输入
+		
+		portList: [//所需要的端口列表
+			[
+				"port": 8088,                         //端口号
+				"description": "http jetty port"    //端口描述
+			] as PortMeta
+		],
+		needJavaDebugPort: true,            //是否需要打开远程调试端口
+		logFolder: "/opt/logs/srtable/",      //输入日志的文件夹
+		needMountNodeLib: false,            //是否需要加载node.js库（非node工程都填false）
+		needMountGradleLib: true,           //是否需要加载gradle库（gradle工程都填true）
+		deployScriptFile: "srtable_deploy.sh",
+	)
+	
 
     def static projectsConfig = [
             'srqserver'   : [srqserver],
@@ -149,6 +167,7 @@ class InstanceConfig {
 			'srcos':[srcos],
             'srsupplychain':[srsupplychain],
 			'fe-paidui-crm_crm':[fe_paidui_crm,crm],
-			'fe-paidui-crm':[fe_paidui_crm]
+			'fe-paidui-crm':[fe_paidui_crm],
+			'srtable':[srtable]
     ]
 }
