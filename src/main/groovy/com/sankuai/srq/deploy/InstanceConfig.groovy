@@ -73,7 +73,8 @@ class InstanceConfig {
 
             portList: [
                     ["port": 8088, "description": "jxc server port"] as PortMeta,
-                    ["port": 9103, "description":"thrift port", hostPort:9103] as PortMeta
+                    ["port": 9103, "description":"thrift port"] as PortMeta,
+                    //["port": 9103, "description":"thrift port", hostPort:9103] as PortMeta
             ],
             needJavaDebugPort: false,
             logFolder: "/opt/logs/srq/",
