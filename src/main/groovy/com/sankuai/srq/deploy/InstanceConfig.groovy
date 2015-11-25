@@ -77,7 +77,7 @@ class InstanceConfig {
                     //["port": 9103, "description":"thrift port", hostPort:9103] as PortMeta
             ],
             needJavaDebugPort: false,
-            logFolder: "/opt/logs/srq/",
+            logFolder: "/opt/logs/sr/cms",
             needMountNodeLib: false,
             needMountGradleLib: true,
 
