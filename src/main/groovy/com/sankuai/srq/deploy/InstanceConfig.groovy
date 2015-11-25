@@ -26,7 +26,7 @@ class InstanceConfig {
                     ["port": 8080, "description": "node server port"] as PortMeta
             ],
             needJavaDebugPort: false,
-            logFolder: "/opt/logs/srq/",
+            logFolder: "/var/sankuai/logs/paidui/",
             needMountNodeLib: true,
             needMountGradleLib: false,
 
