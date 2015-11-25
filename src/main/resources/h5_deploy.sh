@@ -10,7 +10,7 @@ bs_hash=`git rev-parse --short HEAD`
 
 npm install --production
 
-[[ -f "public/hash.json" ]] && sed -i "s/HEAD\!/$bs_hash/g" /public/hash.json
+[[ -f "public/hash.json" ]] && sed -i "s/HEAD\!/$bs_hash/g" public/hash.json
 
 cat public/hash.json
 
