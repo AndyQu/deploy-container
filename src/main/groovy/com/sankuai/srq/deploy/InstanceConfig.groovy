@@ -169,6 +169,7 @@ class InstanceConfig {
             'srsupplychain':[srsupplychain],
 			'fe-paidui-crm_crm':[fe_paidui_crm,crm],
 			'fe-paidui-crm':[fe_paidui_crm],
-			'srtable':[srtable]
+			'srtable':[srtable],
+            'srcms_h5':[fastFood, h5],
     ]
 }
