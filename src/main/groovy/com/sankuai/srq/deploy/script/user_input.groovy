@@ -14,20 +14,21 @@ def readInParametersAndConfig(List<ProjectMeta> pMetaList) {
     }
     pMetaList.each {
         def majorBranchName = console.readLine("${it.projectName} branch name:").trim()
-        if (majorBranchName.isEmpty()) {
-            majorBranchName = "dev"
+        if(!majorBranchName.isEmpty()){
+            it.gitbranchName = majorBranchName
+        } else if(it.gitbranchName==null){
+            it.gitbranchName="dev"
         }
+        println("${it.projectName} branch name:${it.gitbranchName}")
 
         def subBranchName = null
         if (it.subModuleBranchName != null) {
             subBranchName = console.readLine("${it.projectName} sub module branch name:").trim()
-            if (subBranchName.isEmpty()) {
-                subBranchName = "dev"
+            if (!subBranchName.isEmpty()) {
+                it.subModuleBranchName=subBranchName
             }
+            println("${it.projectName} sub module branch name:${it.subModuleBranchName}")
         }
-
-        it.gitbranchName = majorBranchName
-        it.subModuleBranchName = subBranchName
 
         if (console.readLine("Do you want to change port configuration(y/n,default no)?").trim().equalsIgnoreCase("y")) {
             it.portList.each {
