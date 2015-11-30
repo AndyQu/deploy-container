@@ -18,6 +18,6 @@ curl -s --fail -X POST -d "ring=1&target=fe/fe-paidui" -d "hash=$bs_hash" build.
 
 #mv config/dev.js.sample config/dev.js
 sed 's/sr.test.meituan.com/localhost:8088/g' -i config/test.js
-mkdir -p /usr/local/tmp/
-sed 's/\/var\/sankuai\/logs\/paidui/\/usr\/local\/tmp/g' -i pm2-testy.json
+#mkdir -p /usr/local/tmp/
+#sed 's/\/var\/sankuai\/logs\/paidui/\/usr\/local\/tmp/g' -i pm2-testy.json
 npm run-script start-testy
