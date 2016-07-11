@@ -5,9 +5,11 @@ import org.testng.annotations.Test
 class TestExec {
     @Test
     def void run(){
-        DockerClient client = new DockerClientImpl(dockerHost: 'http://172.27.2.94:4243',)
+        /*
+        DockerClient client = new DockerClientImpl()
         def response = client.exec('d470e897df9d',['/bin/bash','/scripts/deploy_qgc.sh'])
         println response.stream.text
         println response.stream
+        */
     }
 }

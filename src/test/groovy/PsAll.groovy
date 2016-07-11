@@ -7,7 +7,7 @@ import org.testng.annotations.Test
 class PsAll {
     @Test
     def void run(){
-        DockerClient dClient = new DockerClientImpl(dockerHost: 'http://172.27.2.94:4243',)
+        DockerClient dClient = new DockerClientImpl()
         DockerResponse response = dClient.ps(query: [all: true, size: true])
         response.content.each {
             println new JsonBuilder(it).toPrettyString()

@@ -13,7 +13,6 @@ class TestDeploy {
                 projectName: "qgc",
                 gitRepoUri: "ssh://git@git.sankuai.com/srt/srqserver.git",
                 gitbranchName: "master",
-                subModuleBranchName: "master",
 
                 portList:[
                         ["port":8088,"description":"http jetty port"] as PortMeta
@@ -25,12 +24,11 @@ class TestDeploy {
 
                 deployScriptFile:"/tmp/queue.sh",
         )
-
     }
 
     @Test
     def void deploy(){
-        DeployEngine engine = new DeployEngine('http://172.27.2.94:4243')
+        DeployEngine engine = new DeployEngine()
         engine.deploy("qgc", [queueMeta])
     }
 }
