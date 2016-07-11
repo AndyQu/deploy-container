@@ -45,8 +45,6 @@ echo "开始部署工程:${projectName}"
 TERM=dumb
 
 #定制产生配置文件
-folder=`dirname $0`
-cd ${folder}
 cp src/main/resources/localhost_mac/envConf.json src/main/resources/envConf.json
 ./gradlew --console=plain -Pmain=user_input -Pargs="${projectName},src/main/resources/envConf.json" run
 
@@ -55,6 +53,6 @@ config_file=${projectName}_`date "+%Y-%m-%d_%H-%M-%S"`.json
 scp /tmp/${projectName}.json root@${host}:/tmp/${config_file}
 
 #执行部署脚本
-ssh root@${host} "export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_51.jdk/Contents/Home/;PATH=/usr/local/bin/:$PATH;echo $PATH;cd /root/;git clone https://github.com/AndyQu/deploy_system.git;cd deploy_system;./gradlew -Pmain=deploy -Pargs=/tmp/${config_file} run"
+ssh root@${host} "export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_51.jdk/Contents/Home/;PATH=/usr/local/bin/:$PATH;echo $PATH;cd ~;rm -rf deploy_system;git clone https://github.com/AndyQu/deploy_system.git;cd deploy_system;./gradlew -Pmain=deploy -Pargs=/tmp/${config_file} run"
 
 

@@ -163,7 +163,7 @@ class InstanceConfig {
 				["port": 8080, "description": "spring boot port"] as PortMeta
 		],
 		needJavaDebugPort: true,
-		logFolder: "/tmp/logs/web_hive_sql",
+		logFolder: "/tmp/logs/web-hive-sql/",
 		needMountNodeLib: false,
 		needMountGradleLib: true,
 
