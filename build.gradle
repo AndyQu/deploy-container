@@ -32,6 +32,6 @@ run {
     standardInput = java.lang.System.in
     if (project.hasProperty('main')) {
         main = "com.sankuai.srq.deploy.script.${project.getProperty('main')}"
-        args = [project.getProperty("args")]
+        args = project.getProperty("args").split(",").toList()
     }
 }
