@@ -2,7 +2,7 @@
 基于Docker，将Project部署到container中。
 
 ## Eclipse需要安装的工具
-1. Groovy-Eclipse (在Eclipse的Mars版本上，groovy-eclipse与webclipse插件不兼容)
+1. [Groovy-Eclipse](https://github.com/groovy/groovy-eclipse/wiki)。一定要使用update site方式安装；使用marketplace有兼容性问题。
 2. Gradle
 3. minimal gradle editor（编辑gradle文件）
 
