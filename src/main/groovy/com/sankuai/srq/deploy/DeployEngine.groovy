@@ -325,17 +325,18 @@ git submodule update --init --recursive
                         "RW"         : true
                 ]
         }
-        if (pMetaList.find { pMeta -> pMeta.needMountNodeLib }) {
+		// 暂时不挂在node目录
+        /*if (pMetaList.find { pMeta -> pMeta.needMountNodeLib }) {
             mounts.add([
                     "Source"     : "/home/sankuai/fe-paidui/node_modules/",
                     "Destination": "/src/node_modules/",
                     "RW"         : true
             ])
-        }
+        }*/
         if (pMetaList.find { pMeta -> pMeta.needMountGradleLib }) {
             mounts.add(
                     [
-                            "Source"     : "/home/sankuai/.gradle/",
+                            "Source"     : "~/.gradle/",
                             "Destination": "/root/.gradle/",
                             "RW"         : true
                     ]
@@ -343,7 +344,7 @@ git submodule update --init --recursive
         }
         mounts.add(
                 [
-                        "Source"     : "/home/sankuai/.ssh/",
+                        "Source"     : "~/.ssh/",
                         "Destination": "/root/.ssh",
                         "RW"         : true
                 ]
