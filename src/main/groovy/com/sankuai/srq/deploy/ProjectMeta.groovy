@@ -7,7 +7,6 @@ class ProjectMeta {
     def String projectName
     def String gitRepoUri
     def String gitbranchName
-    def String subModuleBranchName
 
     def List<PortMeta> portList
     def Boolean needJavaDebugPort

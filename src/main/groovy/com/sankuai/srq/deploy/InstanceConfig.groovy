@@ -5,7 +5,6 @@ class InstanceConfig {
             projectName: "srqserver",
             gitRepoUri: "ssh://git@git.sankuai.com/srt/srqserver.git",
             gitbranchName: "dev",
-            subModuleBranchName: "dev",
 
             portList: [
                     ["port": 8088, "description": "http jetty port"] as PortMeta
@@ -37,7 +36,6 @@ class InstanceConfig {
             projectName: "CRM",
             gitRepoUri: "ssh://git@git.sankuai.com/srt/srcrmserver.git",
             gitbranchName: "dev",
-            subModuleBranchName: "dev",
 
             portList: [
                     ["port": 8088, "description": "crm server port"] as PortMeta
@@ -87,7 +85,6 @@ class InstanceConfig {
 		projectName: "srcos",                                         //项目名称
 		gitRepoUri: "ssh://git@git.sankuai.com/srt/srcosserver.git",        //项目git repo url
 		gitbranchName: "dev",                                         //默认branch名称，在部署时还会提示用户输入
-		//subModuleBranchName: "",                                       //有子工程则填写，没有则不需要填写
 		portList: [//所需要的端口列表
 			[
 				"port": 8088,                         //端口号
@@ -157,6 +154,22 @@ class InstanceConfig {
 		deployScriptFile: "srtable_deploy.sh",
 	)
 	
+	static ProjectMeta web_hive_sql = new ProjectMeta(
+		projectName: "WebHiveSql",
+		gitRepoUri: "https://github.com/AndyQu/WebHiveSql.git",
+		gitbranchName: "master",
+
+		portList: [
+				["port": 8080, "description": "spring boot port"] as PortMeta
+		],
+		needJavaDebugPort: true,
+		logFolder: "/tmp/logs/web-hive-sql/",
+		needMountNodeLib: false,
+		needMountGradleLib: true,
+
+		deployScriptFile: "web_hive_sql_deploy.sh",
+)
+	
 
     def static projectsConfig = [
             'srqserver'   : [srqserver],
@@ -171,5 +184,6 @@ class InstanceConfig {
 			'fe-paidui-crm':[fe_paidui_crm],
 			'srtable':[srtable],
             'srcms_h5':[fastFood, h5],
+			'web_hive_sql':[web_hive_sql],
     ]
 }

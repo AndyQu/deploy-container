@@ -4,6 +4,7 @@ import de.gesellix.docker.client.DockerClientImpl
 import de.gesellix.docker.client.DockerResponse
 import groovy.json.JsonBuilder
 import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 import java.security.MessageDigest
 
@@ -60,9 +61,18 @@ class Tool {
 
 class DockerTool {
     def static void extendDockerClientImpl(){
+        /*
+        DockerClientImpl在gesellix/docker-client的15年版本中，日志器名字是logger。
+        在16年版本中，日志器名字是log。
+        为了保证部署系统的独立性，在这里加一个我们自己的日志器loggeR
+        */
+        addLogger()
         addQueryContainerName()
         addStopAndRemoveContainer()
 		addQueryAllContainerPorts()
+    }
+    def static void addLogger(){
+        DockerClientImpl.metaClass.loggeR=LoggerFactory.getLogger(DockerTool)
     }
     def static void addQueryContainerName() {
         DockerClientImpl.metaClass.queryContainerName = {
@@ -94,14 +104,14 @@ class DockerTool {
                 if (response.status.success || response.status.code == 304) {
                     response = rm(containerId)
                     if (response.status.success) {
-                        logger.info("remove ${containerId} successfully")
+                        loggeR.info("remove ${containerId} successfully")
                     }else{
-                        logger.error("remove ${containerId} failed")
-                        logger.error(response)
+                        loggeR.error("remove ${containerId} failed")
+                        loggeR.error(response)
                     }
                 }else{
-                    logger.error("stop ${containerId} failed")
-                    logger.error(response)
+                    loggeR.error("stop ${containerId} failed")
+                    loggeR.error(response)
                 }
         }
     }
@@ -118,7 +128,7 @@ class DockerTool {
 						}
 				}.flatten()
 			}else{
-				logger.error "event_name=ps-all-containers-fail response=${response}"
+				loggeR.error "event_name=ps-all-containers-fail response=${response}"
 				[]
 			}
 		}

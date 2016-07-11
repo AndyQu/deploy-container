@@ -18,7 +18,12 @@ class DeployEngine {
     def DeployEngine(String dockerHost, int port) {
         //'http://172.27.2.94:4243'
         host = dockerHost
-        dClient = new DockerClientImpl(dockerHost: "${dockerHost}:${port}",)
+        dClient = DockerClientImpl(dockerHost: "${dockerHost}:${port}",)
+    }
+
+    def DeployEngine(){
+        dClient = new DockerClientImpl()
+        host="default-localhost"
     }
 
     def _deploy(String contextFolderPath, String containerId, ProjectMeta pMeta) {
@@ -26,7 +31,7 @@ class DeployEngine {
          * 产生bash脚本,用于在docker容器内部部署Project:
          * 1. 创建环境变量
          * 2. 将代码从gitRepoUri上pull下来,切换到分支:GitbranchName
-         * 3. 初始化subModule,并且切换到分支:SubModuleBranchName(如果subModuleBranchName为空,则不需要作这一步)
+         * 3. 初始化subModule
          * 4. deployScriptFile的bash command
          */
         def deployScriptPath = "${contextFolderPath}/scripts/deploy_${pMeta.projectName}.sh"
@@ -45,14 +50,13 @@ git pull
 """
         /**
          * 拉取子工程代码
+         * project/sub project之间的关系是其内部关系，不应该与部署系统耦合在一起。
+         * 之前，部署系统会主动要求用户输入sub project的分支，然后去拉取，这是不对的。
+         * RD应自己保证工程的可编译、可打包。
          */
-        if (pMeta.subModuleBranchName != null) {
-            deployFile << """
-git submodule init
-git submodule update
-git submodule foreach git checkout ${pMeta.subModuleBranchName}
+        deployFile << """
+git submodule update --init --recursive
 """
-        }
         /**
          * 个性化部署脚本
          */
@@ -82,7 +86,7 @@ git submodule foreach git checkout ${pMeta.subModuleBranchName}
         logger.info("[Time Cost] ${endT-startT}ms")
     }
 
-    def deploy(String ownerName, List<ProjectMeta> pMetaList) {
+    def deploy(String ownerName, List<ProjectMeta> pMetaList, String imgName) {
         def contextFolderPath = null
         def deployScriptPath = null
         /**
@@ -139,7 +143,7 @@ git submodule foreach git checkout ${pMeta.subModuleBranchName}
          */
         def containerConfig = [
                 "Cmd"         : ["/sbin/init"],
-                "Image"       : "srq/ubuntu:1.1",
+                "Image"       : imgName,
                 "Mounts"      : allMountPoints,
                 "ExposedPorts": configedPortList.inject(new LinkedHashMap<String, Object>()) {
                     map, it ->
@@ -321,17 +325,18 @@ git submodule foreach git checkout ${pMeta.subModuleBranchName}
                         "RW"         : true
                 ]
         }
-        if (pMetaList.find { pMeta -> pMeta.needMountNodeLib }) {
+		// 暂时不挂在node目录
+        /*if (pMetaList.find { pMeta -> pMeta.needMountNodeLib }) {
             mounts.add([
                     "Source"     : "/home/sankuai/fe-paidui/node_modules/",
                     "Destination": "/src/node_modules/",
                     "RW"         : true
             ])
-        }
+        }*/
         if (pMetaList.find { pMeta -> pMeta.needMountGradleLib }) {
             mounts.add(
                     [
-                            "Source"     : "/home/sankuai/.gradle/",
+                            "Source"     : "~/.gradle/",
                             "Destination": "/root/.gradle/",
                             "RW"         : true
                     ]
@@ -339,7 +344,7 @@ git submodule foreach git checkout ${pMeta.subModuleBranchName}
         }
         mounts.add(
                 [
-                        "Source"     : "/home/sankuai/.ssh/",
+                        "Source"     : "~/.ssh/",
                         "Destination": "/root/.ssh",
                         "RW"         : true
                 ]

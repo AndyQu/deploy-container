@@ -17,5 +17,9 @@ MDC.put("PID", pid);
 def jsonSlurper = new JsonSlurper();
 def jsonData = jsonSlurper.parse(new FileReader(new File(args[0])))
 
-DeployEngine engine = new DeployEngine('http://172.27.2.94', 4243)
-engine.deploy(jsonData.ownerName, jsonData.projects as List<ProjectMeta>)
+if(jsonData.useDockerSock==1){
+    DeployEngine engine = new DeployEngine()
+}else{
+    DeployEngine engine = new DeployEngine(jsonData.dockerDaemon.host, jsonData.dockerDaemon.port)
+}
+engine.deploy(jsonData.ownerName, jsonData.projects as List<ProjectMeta>, jsonData.imgName)

@@ -19,9 +19,9 @@ class TestExtendDockerClientImpl {
     def void setUp(){
         Tool.extendLog4j()
         DockerTool.extendDockerClientImpl()
-        dClient = new DockerClientImpl(dockerHost: 'http://172.27.2.94:4243',)
-        def containerConfig = ["Cmd"   : ["/sbin/init"],
-                               "Image" : "srq/ubuntu:1.0",
+        dClient = new DockerClientImpl()
+        def containerConfig = ["Cmd"   : [],
+                               "Image" : "busybox:latest",
                                ]
         try {
             def response = dClient.createContainer(containerConfig, [name: containerName])
