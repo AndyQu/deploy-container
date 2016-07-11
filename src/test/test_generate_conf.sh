@@ -3,4 +3,4 @@
 projectName=h5
 pwd
 cp src/main/resources/localhost_mac/envConf.json src/main/resources/envConf.json
-./gradlew -Pmain=user_input -Pargs="${projectName},src/main/resources/envConf.json" run
+./gradlew --console=plain -Pmain=user_input -Pargs="${projectName},src/main/resources/envConf.json" run
