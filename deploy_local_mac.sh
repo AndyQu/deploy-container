@@ -48,7 +48,7 @@ TERM=dumb
 folder=`dirname $0`
 cd ${folder}
 cp src/main/resources/localhost_mac/envConf.json src/main/resources/envConf.json
-./gradlew -Pmain=user_input -Pargs="${projectName},src/main/resources/envConf.json" run
+./gradlew --console=plain -Pmain=user_input -Pargs="${projectName},src/main/resources/envConf.json" run
 
 #传递到主机上
 config_file=${projectName}_`date "+%Y-%m-%d_%H-%M-%S"`.json
