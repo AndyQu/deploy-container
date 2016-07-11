@@ -154,6 +154,22 @@ class InstanceConfig {
 		deployScriptFile: "srtable_deploy.sh",
 	)
 	
+	static ProjectMeta web_hive_sql = new ProjectMeta(
+		projectName: "WebHiveSql",
+		gitRepoUri: "https://github.com/AndyQu/WebHiveSql.git",
+		gitbranchName: "master",
+
+		portList: [
+				["port": 8080, "description": "spring boot port"] as PortMeta
+		],
+		needJavaDebugPort: true,
+		logFolder: "/tmp/logs/web_hive_sql",
+		needMountNodeLib: false,
+		needMountGradleLib: true,
+
+		deployScriptFile: "web_hive_sql_deploy.sh",
+)
+	
 
     def static projectsConfig = [
             'srqserver'   : [srqserver],
@@ -168,5 +184,6 @@ class InstanceConfig {
 			'fe-paidui-crm':[fe_paidui_crm],
 			'srtable':[srtable],
             'srcms_h5':[fastFood, h5],
+			'web_hive_sql':[web_hive_sql],
     ]
 }

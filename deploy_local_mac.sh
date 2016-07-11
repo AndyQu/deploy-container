@@ -10,7 +10,7 @@
 host=localhost
 
 
-projects=(srqserver h5 crm jxc srcms srqserver_h5 srcos srsupplychain fe-paidui-crm fe-paidui-crm_crm srtable srcms_h5)
+projects=(web_hive_sql srqserver h5 crm jxc srcms srqserver_h5 srcos srsupplychain fe-paidui-crm fe-paidui-crm_crm srtable srcms_h5)
 function help {
     echo "可以部署的项目如下:"
     for project in ${projects[@]}; do
