@@ -4,6 +4,7 @@ import com.sankuai.srq.deploy.InstanceConfig
 import com.sankuai.srq.deploy.ProjectMeta
 import com.sankuai.srq.deploy.Tool
 import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper
 
 def readInParametersAndConfig(List<ProjectMeta> pMetaList) {
     def console = new BufferedReader(new InputStreamReader(System.in))
@@ -21,15 +22,6 @@ def readInParametersAndConfig(List<ProjectMeta> pMetaList) {
         }
         println("${it.projectName} branch name:${it.gitbranchName}")
 
-        def subBranchName = null
-        if (it.subModuleBranchName != null) {
-            subBranchName = console.readLine("${it.projectName} sub module branch name:").trim()
-            if (!subBranchName.isEmpty()) {
-                it.subModuleBranchName=subBranchName
-            }
-            println("${it.projectName} sub module branch name:${it.subModuleBranchName}")
-        }
-
         if (console.readLine("Do you want to change port configuration(y/n,default no)?").trim().equalsIgnoreCase("y")) {
             it.portList.each {
                 portMeta ->
@@ -46,17 +38,25 @@ def readInParametersAndConfig(List<ProjectMeta> pMetaList) {
     ]
 }
 
+def objsToJson(objA, objB){
+    new JsonBuilder(objA+objB).toPrettyString()
+}
+
 /**
  * 在/tmp/目录下面产生配置文件
  */
-if (args.size() <= 0) {
-    println("请指定要部署的工程名称.目前支持可部署的工程包括:${InstanceConfig.projectsConfig.keySet()}")
+println "args:${args}"
+if (args.size() <= 1) {
+    println("请指定要部署的工程名称、环境配置文件.目前支持可部署的工程包括:${InstanceConfig.projectsConfig.keySet()}")
     System.exit(1)
 }else {
+    def jsonSlurper = new JsonSlurper();
+
     Tool.extendBufferedReader()
     def projectName = args[0]
+    def envConfFileName = args[1]
     def config = readInParametersAndConfig(InstanceConfig.projectsConfig[projectName])
-    def json = new JsonBuilder(config).toPrettyString()
+    def json = objsToJson(config, jsonSlurper.parse(new FileReader(new File(envConfFileName))))
     println("部署配置:${json}")
     def outputFile = new File("/tmp/${projectName}.json")
     outputFile.delete()
