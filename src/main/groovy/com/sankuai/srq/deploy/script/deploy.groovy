@@ -24,4 +24,4 @@ if(jsonData.useDockerSock==1){
 }else{
     engine = new DeployEngine(jsonData.dockerDaemon.host, jsonData.dockerDaemon.port)
 }
-engine.deploy(jsonData.ownerName, jsonData.projects as List<ProjectMeta>, jsonData.imgName)
+engine.deploy(jsonData.ownerName, jsonData.projects as List<ProjectMeta>, jsonData.imgName, jsonData)

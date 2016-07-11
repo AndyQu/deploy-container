@@ -86,7 +86,7 @@ git submodule update --init --recursive
         logger.info("[Time Cost] ${endT-startT}ms")
     }
 
-    def deploy(String ownerName, List<ProjectMeta> pMetaList, String imgName) {
+    def deploy(String ownerName, List<ProjectMeta> pMetaList, String imgName, jsonData) {
         def contextFolderPath = null
         def deployScriptPath = null
         /**
@@ -123,7 +123,7 @@ git submodule update --init --recursive
         /**
          * 需要挂载的目录:
          */
-        def (allMountPoints, nonLibMountPoints) = calcMountPoints(pMetaList, dockerName, contextFolderPath)
+        def (allMountPoints, nonLibMountPoints) = calcMountPoints(pMetaList, dockerName, contextFolderPath, jsonData)
         /**
          * 停止/删除已存在的container
          */
@@ -302,7 +302,7 @@ git submodule update --init --recursive
      * @param pMetaList
      * @return
      */
-    def static calcMountPoints(List<ProjectMeta> pMetaList, dockerName, contextFolderPath) {
+    def static calcMountPoints(List<ProjectMeta> pMetaList, dockerName, contextFolderPath, jsonData) {
         Set<String> containerInnerVolumnSet = pMetaList.inject(new HashSet<>()) {
             volumnSet, pMeta ->
                 if (pMeta.logFolder != null) {
@@ -336,7 +336,7 @@ git submodule update --init --recursive
         if (pMetaList.find { pMeta -> pMeta.needMountGradleLib }) {
             mounts.add(
                     [
-                            "Source"     : "~/.gradle/",
+                            "Source"     : "${jsonData.userFolder}/.gradle/",
                             "Destination": "/root/.gradle/",
                             "RW"         : true
                     ]
@@ -344,7 +344,7 @@ git submodule update --init --recursive
         }
         mounts.add(
                 [
-                        "Source"     : "~/.ssh/",
+                        "Source"     : "${jsonData.userFolder}/.ssh/",
                         "Destination": "/root/.ssh",
                         "RW"         : true
                 ]
