@@ -159,7 +159,8 @@ git submodule update --init --recursive
                                 )
                                 map
                         }
-                ]
+                ],
+				"Tty": true,
         ]
         logger.info("将要创建的container信息:")
         logger.info(containerConfig)
