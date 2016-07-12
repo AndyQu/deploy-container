@@ -93,17 +93,8 @@ git submodule update --init --recursive
          * 根据分支名称,产生md5,与ownerName一起作为docker的名称
          *
          * */
-        String dockerName = "${ownerName}-" + Tool.generateMD5(
-			pMetaList.collect(){
-				pMeta->pMeta.projectName
-			}.join("-")
-			+
-			"_"
-			+
-			pMetaList.collect {
-				pMeta ->pMeta.gitbranchName
-			}.join("-")
-		)
+        String dockerName = generateContainerName(ownerName,pMetaList) 
+		
         contextFolderPath = "/tmp/docker-deploy/${dockerName}/"
 
         /**
@@ -376,4 +367,30 @@ git submodule update --init --recursive
 
         }
     }
+	
+	def static generateContainerName(ownerName,pMetaList){
+		/*
+		TimeZone.setDefault(TimeZone.getTimeZone('UTC'))
+		def now = new Date()
+		now.format("yyyyMMdd-HH:mm:ss.SSS")
+		*/
+		
+		"${ownerName}-" + pMetaList.collect(){
+				pMeta->"${pMeta.projectName}_${pMeta.gitbranchName}"
+			}.join("-")
+		
+		/*
+		"${ownerName}-" + Tool.generateMD5(
+			pMetaList.collect(){
+				pMeta->pMeta.projectName
+			}.join("-")
+			+
+			"_"
+			+
+			pMetaList.collect {
+				pMeta ->pMeta.gitbranchName
+			}.join("-")
+		)
+		*/
+	}
 }
