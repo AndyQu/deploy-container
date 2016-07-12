@@ -116,6 +116,10 @@ git submodule update --init --recursive
         if (container != null) {
             logger.info("docker container ${dockerName} 已存在. 使用它已申请的端口")
             configedPortList = queryExistingPorts(dClient, container)
+			if(configedPortList.isEmpty()){
+				logger.warn("从docker container ${dockerName}出获取到的端口列表是空的。")
+				configedPortList = allocateNewPorts(pMetaList, dClient.queryAllContainerPorts())
+			}
         } else {
             configedPortList = allocateNewPorts(pMetaList, dClient.queryAllContainerPorts())
         }
@@ -208,7 +212,7 @@ git submodule update --init --recursive
      */
     def static List<Object> queryExistingPorts(DockerClient dClient, container) {
 
-        logger.info(container.Ports.toString())
+        logger.info("容器端口：${container.Ports}")
         return container.Ports
     }
 
