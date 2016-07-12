@@ -104,7 +104,7 @@ git submodule update --init --recursive
 				pMeta ->pMeta.gitbranchName
 			}.join("-")
 		)
-        contextFolderPath = "/docker-deploy/${dockerName}/"
+        contextFolderPath = "/tmp/docker-deploy/${dockerName}/"
 
         /**
          * 端口映射信息处理:
