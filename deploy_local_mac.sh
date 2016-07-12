@@ -1,14 +1,5 @@
 #!/bin/bash
-
-# 在Mac本地机器上做测试用
-# 前提，打通 ssh root@localhost（为什么不能直接置换至root用户???）
-# 1. 切换至root用户：sudo su root
-# 2. 设置root密码：passwd
-# ssh root@localhost "cat >> ~/.ssh/authorized_keys" < ~/.ssh/id_rsa.pub
-
-
-host=localhost
-
+#在Mac本地机器上做测试用
 
 projects=(web_hive_sql srqserver h5 crm jxc srcms srqserver_h5 srcos srsupplychain fe-paidui-crm fe-paidui-crm_crm srtable srcms_h5)
 function help {
@@ -50,9 +41,12 @@ cp src/main/resources/localhost_mac/envConf.json src/main/resources/envConf.json
 
 #传递到主机上
 config_file=${projectName}_`date "+%Y-%m-%d_%H-%M-%S"`.json
-scp /tmp/${projectName}.json root@${host}:/tmp/${config_file}
+cp /tmp/${projectName}.json /tmp/${config_file}
 
 #执行部署脚本
-ssh root@${host} "export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_51.jdk/Contents/Home/;PATH=/usr/local/bin/:$PATH;echo $PATH;cd ~;rm -rf deploy_system;git clone https://github.com/AndyQu/deploy_system.git;cd deploy_system;./gradlew -Pmain=deploy -Pargs=/tmp/${config_file} run"
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_51.jdk/Contents/Home/
+PATH=/usr/local/bin/:$PATH
+echo $PATH
+./gradlew -Pmain=deploy -Pargs=/tmp/${config_file} run
 
 
