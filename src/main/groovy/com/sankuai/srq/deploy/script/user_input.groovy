@@ -10,9 +10,9 @@ def readInParametersAndConfig(List<ProjectMeta> pMetaList) {
     def console = new BufferedReader(new InputStreamReader(System.in))
     def ownerName = console.readLine('please input your name:').trim()
     if (ownerName.isEmpty()) {
-        println("[Error]~~~your name is required~~~")
-        System.exit(1)
+		ownerName="anony"
     }
+	println("please input your name:${ownerName}")
     pMetaList.each {
         def majorBranchName = console.readLine("${it.projectName} branch name:").trim()
         if(!majorBranchName.isEmpty()){
