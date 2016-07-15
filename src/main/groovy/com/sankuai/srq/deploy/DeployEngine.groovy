@@ -332,6 +332,11 @@ git submodule update --init --recursive
                     ]
             )
         }
+		
+		/*
+		 * Notice：Project的git repo地址必须要配置为走Http方式。如果是走ssh方式，则Host主机必须加ssh key，且这里的挂载点不能够去掉。
+		 * 经验证，对于美团自己的git repo，使用http方式走不通。因此，这个挂载点不能去掉。
+		 */
         mounts.add(
                 [
                         "Source"     : "${jsonData.userFolder}/.ssh/",
