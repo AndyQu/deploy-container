@@ -2,11 +2,12 @@ package com.sankuai.srq.deploy.script
 
 import com.sankuai.srq.deploy.InstanceConfig
 import com.sankuai.srq.deploy.ProjectMeta
+import com.sankuai.srq.deploy.ProjectMetaManager;
 import com.sankuai.srq.deploy.Tool
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 
-def readInParametersAndConfig(List<ProjectMeta> pMetaList) {
+def readInParametersAndConfig(Collection<ProjectMeta> pMetaList) {
     def console = new BufferedReader(new InputStreamReader(System.in))
     def ownerName = console.readLine('please input your name:').trim()
     if (ownerName.isEmpty()) {
@@ -46,19 +47,36 @@ def objsToJson(objA, objB){
  * 在/tmp/目录下面产生配置文件
  */
 println "args:${args}"
+
+//获取Meta数据
+ProjectMetaManager.getInstance().updateData()
+def validProjectNames = ProjectMetaManager.getInstance().getAllProjectNames()
+
 if (args.size() <= 1) {
-    println("请指定要部署的工程名称、环境配置文件.目前支持可部署的工程包括:${InstanceConfig.projectsConfig.keySet()}")
+    println("请指定要部署的工程名称、环境配置文件.目前支持可部署的工程包括:${validProjectNames}")
     System.exit(1)
 }else {
-    def jsonSlurper = new JsonSlurper();
+	def targetProjectNames = args[0].split " "
+	def envConfFileName = args[1]
+	
+	targetProjectNames.each {
+		it->
+			if(!validProjectNames.contains(it)){
+				println "要部署的工程 ${it} 不存在。目前支持可部署的工程包括:${validProjectNames}"
+				System.exit(1)
+			}
+	}
 
     Tool.extendBufferedReader()
-    def projectName = args[0]
-    def envConfFileName = args[1]
-    def config = readInParametersAndConfig(InstanceConfig.projectsConfig[projectName])
+	Collection<ProjectMeta> metas = ProjectMetaManager.getInstance().getProjectMetas(targetProjectNames as List)
+    def config = readInParametersAndConfig(metas)
+	
+	def jsonSlurper = new JsonSlurper()
     def json = objsToJson(config, jsonSlurper.parse(new FileReader(new File(envConfFileName))))
     println("部署配置:${json}")
-    def outputFile = new File("/tmp/${projectName}.json")
+	
+	def name=targetProjectNames.join("_")
+    def outputFile = new File("/tmp/${name}.json")
     outputFile.delete()
     outputFile.write(json, "utf-8")
 }

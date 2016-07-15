@@ -61,9 +61,12 @@ git submodule update --init --recursive
          * 个性化部署脚本
          */
         if (pMeta.deployScriptFile != null) {
-            DeployEngine.class.getResource("/${pMeta.deployScriptFile}").withReader {
-                deployFile << it
-            }
+//            DeployEngine.class.getResource("/${pMeta.deployScriptFile}").withReader {
+//                deployFile << it
+//            }
+			new File(ProjectMetaManager.getInstance().getProjectBashFile(pMeta.projectName)).withReader {
+				deployFile << it
+			}
         } else {
             throw new Exception("${pMeta.projectName} 没有指定文件DeployScriptFile")
         }
