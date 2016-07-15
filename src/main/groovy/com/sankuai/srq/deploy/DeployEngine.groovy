@@ -103,28 +103,22 @@ git submodule update --init --recursive
          */
         Boolean dockerExists = false
         def container = dClient.queryContainerName(dockerName)
-        List<Object> configedPortList = null
-        if (container != null) {
-            logger.info("docker container ${dockerName} 已存在. 使用它已申请的端口")
-            configedPortList = queryExistingPorts(dClient, container)
-			if(configedPortList.isEmpty()){
-				logger.warn("从docker container ${dockerName}出获取到的端口列表是空的。")
-				configedPortList = allocateNewPorts(pMetaList, dClient.queryAllContainerPorts())
-			}
-        } else {
-            configedPortList = allocateNewPorts(pMetaList, dClient.queryAllContainerPorts())
-        }
+		
+		/**
+		 * 停止/删除已存在的container
+		 */
+		if (container != null) {
+			logger.info("event_name=发现同名container 停止并删除它");
+			dClient.stopAndRemoveContainer(container.Id)
+		}
+		
+        List<Object> configedPortList  = allocateNewPorts(pMetaList, dClient.queryAllContainerPorts())
 
         /**
          * 需要挂载的目录:
          */
         def (allMountPoints, nonLibMountPoints) = calcMountPoints(pMetaList, dockerName, contextFolderPath, jsonData)
-        /**
-         * 停止/删除已存在的container
-         */
-        if (container != null) {
-            dClient.stopAndRemoveContainer(container.Id)
-        }
+        
         /**
          * 创建/docker-deploy目录
          * 在/docker-deploy目录下面创建属于本次部署的私有目录: /docker-deploy/${docker-name}*/
