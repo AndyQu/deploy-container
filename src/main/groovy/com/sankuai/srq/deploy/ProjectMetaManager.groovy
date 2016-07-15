@@ -27,7 +27,8 @@ class ProjectMetaManager {
 			println "git clone https://github.com/AndyQu/deploy_sys_project_meta.git".execute(null, new File(pFolder)).text
 		}else{
 			//TODO
-			println "git checkout master;git pull".execute(null, new File(metasFolder)).text
+			println "git checkout master".execute(null, new File(metasFolder)).text
+			println "git pull".execute(null, new File(metasFolder)).text
 		}
 		_parse()
 	}
@@ -43,7 +44,7 @@ class ProjectMetaManager {
 				}else{
 					def metaJson = jsonSlurper.parse(new FileReader("${projectFolder.absolutePath}/meta.json"))
 					nameMetaMap[metaJson.projectName.toLowerCase()]=metaJson
-					nameBashMap[metaJson.projectName.toLowerCase()]="${projectFolder.absolutePath}}/deploy.sh"
+					nameBashMap[metaJson.projectName.toLowerCase()]="${projectFolder.absolutePath}/deploy.sh"
 					println "读取到Project信息：${metaJson.projectName}"
 				}
 		}

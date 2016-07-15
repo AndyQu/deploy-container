@@ -60,16 +60,9 @@ git submodule update --init --recursive
         /**
          * 个性化部署脚本
          */
-        if (pMeta.deployScriptFile != null) {
-//            DeployEngine.class.getResource("/${pMeta.deployScriptFile}").withReader {
-//                deployFile << it
-//            }
-			new File(ProjectMetaManager.getInstance().getProjectBashFile(pMeta.projectName)).withReader {
-				deployFile << it
-			}
-        } else {
-            throw new Exception("${pMeta.projectName} 没有指定文件DeployScriptFile")
-        }
+		new File(ProjectMetaManager.getInstance().getProjectBashFile(pMeta.projectName)).withReader {
+			deployFile << it
+		}
 
         /**
          * 使用docker exec API接口, 执行自动产生的bash脚本

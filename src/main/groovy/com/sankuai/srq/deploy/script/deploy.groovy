@@ -1,6 +1,8 @@
 package com.sankuai.srq.deploy.script
 import com.sankuai.srq.deploy.DeployEngine
 import com.sankuai.srq.deploy.ProjectMeta
+import com.sankuai.srq.deploy.ProjectMetaManager;
+
 import groovy.json.JsonSlurper
 import org.slf4j.MDC
 
@@ -24,4 +26,5 @@ if(jsonData.useDockerSock==1){
 }else{
     engine = new DeployEngine(jsonData.dockerDaemon.host, jsonData.dockerDaemon.port)
 }
+ProjectMetaManager.getInstance().updateData()
 engine.deploy(jsonData.ownerName, jsonData.projects as List<ProjectMeta>, jsonData.imgName, jsonData)
