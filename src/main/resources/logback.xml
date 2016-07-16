@@ -9,7 +9,7 @@
 		<Append>true</Append>
 		<encoder>
 			<!-- <pattern>[%d{HH:mm:ss.SSS}][%-5level][%logger{0}] - %msg%n</pattern> -->
-			<pattern>%d{HH:mm:ss.SSS} %-5level %logger{0} - %msg%n</pattern>
+			<pattern>%d{HH:mm:ss.SSS} %-5level %logger{0} %class{0} %line - %msg%n</pattern>
 		</encoder>
 
 		<triggeringPolicy
@@ -36,7 +36,7 @@
 			<level>INFO</level>
 		</filter>
 		<encoder>
-			<pattern>%d{HH:mm:ss.SSS} %-5level %logger{0} - %msg%n</pattern>
+			<pattern>%d{HH:mm:ss.SSS} %-5level %logger{0} %class{0} %line - %msg%n</pattern>
 		</encoder>
 	</appender>
 

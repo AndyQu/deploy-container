@@ -26,9 +26,10 @@ class ProjectMetaManager {
 		
 		def f = new File(metasFolder)
 		if(! f.exists()){
-			logger.info "${f} 不存在"
+			logger.info "${f} 不存在. DO: git clone https://github.com/AndyQu/deploy_sys_project_meta.git"
 			logger.info "git clone https://github.com/AndyQu/deploy_sys_project_meta.git".execute(null, new File(pFolder)).text
 		}else{
+			logger.info "${f} 已存在. DO: git checkout master;git pull"
 			logger.info "git checkout master".execute(null, new File(metasFolder)).text
 			logger.info "git pull".execute(null, new File(metasFolder)).text
 		}
@@ -47,7 +48,7 @@ class ProjectMetaManager {
 					def metaJson = jsonSlurper.parse(new FileReader("${projectFolder.absolutePath}/meta.json"))
 					nameMetaMap[metaJson.projectName.toLowerCase()]=metaJson
 					nameBashMap[metaJson.projectName.toLowerCase()]="${projectFolder.absolutePath}/deploy.sh"
-					logger.info "读取到Project信息：${metaJson.projectName}"
+					logger.info "读取到Project Meta信息：${metaJson.projectName}"
 				}
 		}
 	}
