@@ -13,6 +13,7 @@ class CmdUserInput {
 	static{
 		Tool.extendBufferedReader()
 	}
+	def nonInteractMode=false
 	def String work(Collection<String> targetProjectNames, envConfFileName){
 		/*
 		 * 获取工程预定义Meta
@@ -20,7 +21,12 @@ class CmdUserInput {
 		Collection<ProjectMeta> metas = ProjectMetaManager.getInstance().getProjectMetas(targetProjectNames)
 
 		//读取用户输入，apply到Meta
-		def config = readInParametersAndConfig(metas)
+		def config = null
+		if(nonInteractMode){
+			config=nonInteractiveConfig(metas)
+		}else{
+			config=readInParametersAndConfig(metas)
+		}
 
 		//合并：环境配置
 		def jsonSlurper = new JsonSlurper()
@@ -38,6 +44,19 @@ class CmdUserInput {
 
 	def objsToJson(objA, objB){
 		new JsonBuilder(objA+objB).toPrettyString()
+	}
+	
+	def nonInteractiveConfig(Collection<ProjectMeta> pMetaList){
+		def ownerName="anony"
+		println("owner name:${ownerName}")
+		pMetaList.each {
+			it.gitbranchName = "master"
+			println("${it.projectName} branch name:${it.gitbranchName}")
+		}
+		[
+			"ownerName": ownerName,
+			"projects" : pMetaList
+		]
 	}
 
 	def readInParametersAndConfig(Collection<ProjectMeta> pMetaList) {
