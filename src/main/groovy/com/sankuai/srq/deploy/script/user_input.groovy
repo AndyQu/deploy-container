@@ -59,6 +59,9 @@ if (args.size() <= 1) {
 	def targetProjectNames = args[0].split " "
 	def envConfFileName = args[1]
 	
+	/*
+	 * 校验工程名是否存在
+	 */
 	targetProjectNames.each {
 		it->
 			if(!validProjectNames.contains(it)){
@@ -67,14 +70,21 @@ if (args.size() <= 1) {
 			}
 	}
 
+	/*
+	 * 获取工程预定义Meta
+	 */
     Tool.extendBufferedReader()
 	Collection<ProjectMeta> metas = ProjectMetaManager.getInstance().getProjectMetas(targetProjectNames as List)
+	
+	//读取用户输入，apply到Meta
     def config = readInParametersAndConfig(metas)
 	
+	//合并：环境配置
 	def jsonSlurper = new JsonSlurper()
     def json = objsToJson(config, jsonSlurper.parse(new FileReader(new File(envConfFileName))))
     println("部署配置:${json}")
 	
+	//输出最终Conf文件
 	def name=targetProjectNames.join("_")
     def outputFile = new File("/tmp/${name}.json")
     outputFile.delete()
