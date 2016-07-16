@@ -25,7 +25,7 @@ class Tool {
             false
         }
     }
-    def static void extendLog4j(){
+    def static void extendSlf4j(){
         Logger.metaClass.trace={
             msgObj->
                 trace(new JsonBuilder(msgObj).toPrettyString())
