@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="true">
-	<appender name="infoAppender"
+	<!-- <appender name="infoAppender"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
 			<level>debug</level>
@@ -8,7 +8,7 @@
 		<File>/tmp/docker-deploy/all.log</File>
 		<Append>true</Append>
 		<encoder>
-			<!-- <pattern>[%d{HH:mm:ss.SSS}][%-5level][%logger{0}] - %msg%n</pattern> -->
+			<pattern>[%d{HH:mm:ss.SSS}][%-5level][%logger{0}] - %msg%n</pattern>
 			<pattern>%d{HH:mm:ss.SSS} %-5level %logger{0} %class{0} %line - %msg%n</pattern>
 		</encoder>
 
@@ -25,7 +25,7 @@
 			<maxHistory>3</maxHistory>
 		</rollingPolicy>
 
-	</appender>
+	</appender> -->
 
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<!-- encoders are assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder 
@@ -40,11 +40,7 @@
 		</encoder>
 	</appender>
 
-	<!-- <logger name="paidui" additivity="false" level="INFO"> -->
-	<!-- <appender-ref ref="infoAppender" /> -->
-	<!-- </logger> -->
 	<root level="INFO">
 		<appender-ref ref="STDOUT" />
-		<appender-ref ref="infoAppender" />
 	</root>
 </configuration>

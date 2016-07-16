@@ -1,15 +1,29 @@
 package com.sankuai.srq.deploy
 
+import ch.qos.logback.classic.LoggerContext
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.FileAppender
+import ch.qos.logback.core.rolling.RollingFileAppender
+import ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy
+import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy
 import de.gesellix.docker.client.DockerClient
 import de.gesellix.docker.client.DockerClientImpl
 import de.gesellix.docker.client.DockerResponse
+
 import groovy.json.internal.LazyMap
-import org.slf4j.LoggerFactory
 import groovy.json.JsonBuilder
+
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.slf4j.event.LoggingEvent
+
+import ch.qos.logback.core.util.StatusPrinter
+
 
 class DeployEngine {
     static {
-        Tool.extendLog4j()
+        Tool.extendSlf4j()
         DockerTool.extendDockerClientImpl()
     }
     def static final logger = LoggerFactory.getLogger("DeployEngine")
@@ -97,6 +111,7 @@ git submodule update --init --recursive
         String dockerName = generateContainerName(ownerName,pMetaList) 
 		
         contextFolderPath = "/tmp/docker-deploy/${dockerName}/"
+		configureLogger(contextFolderPath)
 
         /**
          * 检查当前是否已经存在同名的docker实例
@@ -370,8 +385,6 @@ git submodule update --init --recursive
     def static buildContextFolder(contextDir, subFolders) {
         def contextFile = new File(contextDir)
 		logger.info "\n============================创建Context文件夹-[开始]==========================="
-		logger.info(contextFile.deleteDir())
-        logger.info("event_name=删除文件夹 folder=${contextDir}")
         
 		logger.info(contextFile.mkdirs())
         logger.info("event_name=创建文件夹 folder=${contextDir}")
@@ -379,9 +392,10 @@ git submodule update --init --recursive
         subFolders.each {
             path ->
                 def subpath = "${contextDir}/" + path.split("/").last()
+				logger.info(new File(subpath).deleteDir())
+				logger.info("event_name=删除文件夹 folder=${subpath}")
                 logger.info(new File(subpath).mkdirs())
 				logger.info("event_name=创建子文件夹 folder=${subpath}")
-
         }
 		logger.info "\n============================创建Context文件夹-[结束]===========================\n"
     }
@@ -410,5 +424,51 @@ git submodule update --init --recursive
 			}.join("-")
 		)
 		*/
+	}
+	
+	def configureLogger(String logFileFolder){
+		//https://github.com/tony19/logback-android/wiki/Appender-Notes#configuration-in-code
+		logger.info "\n========================重新配置Logback-[开始]=================================="
+		LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+		/*
+		 * Notice: dont reset. reset() will discard all loggers/appenders, so root logger will not function any more
+		 */
+//		lc.reset()
+		
+		RollingFileAppender<ILoggingEvent> rollingFileAppender = new RollingFileAppender<ILoggingEvent>();
+		rollingFileAppender.setAppend(true);
+		rollingFileAppender.setContext(lc);
+		rollingFileAppender.setFile("${logFileFolder}/deploy.log");
+		
+		SizeAndTimeBasedRollingPolicy rollingPolicy = new SizeAndTimeBasedRollingPolicy()
+		rollingPolicy.setFileNamePattern("${logFileFolder}/deploy.%d{yyyy-MM-dd}.%i.log");
+		rollingPolicy.setMaxFileSize("300KB")
+		rollingPolicy.setMaxHistory(2)
+		rollingPolicy.setParent(rollingFileAppender)
+		rollingPolicy.setContext(lc)
+		rollingPolicy.start()
+		rollingFileAppender.setRollingPolicy(rollingPolicy)
+		
+		SizeBasedTriggeringPolicy triggerPolicy = new SizeBasedTriggeringPolicy()
+		triggerPolicy.setMaxFileSize("300KB")
+		triggerPolicy.setContext(lc)
+		triggerPolicy.start()
+		rollingFileAppender.setTriggeringPolicy(triggerPolicy)
+		
+		PatternLayoutEncoder encoder = new PatternLayoutEncoder();
+		encoder.setPattern("%d{HH:mm:ss.SSS} %-5level %logger{0} %class{0} %line - %msg%n");
+		encoder.setContext(lc);
+		encoder.start();
+		rollingFileAppender.setEncoder(encoder);
+		
+		rollingFileAppender.start();
+		
+		ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("DeployEngine");
+		logger.setAdditive(true)
+		logger.setLevel(ch.qos.logback.classic.Level.INFO)
+		logger.addAppender(rollingFileAppender)
+		
+		StatusPrinter.print(lc);
+		logger.info "\n========================重新配置Logback-[结束]==================================\n"
 	}
 }
