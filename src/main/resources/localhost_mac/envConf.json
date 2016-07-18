@@ -1,5 +1,5 @@
 {
-    "imgName":"deploy_img:1.0",
+    "imgName":"andyqu/deploy_img:1.0",
     "useDockerSock":1,
     "dockerDaemon":{
         "host":"127.0.0.1",
