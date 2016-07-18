@@ -15,6 +15,9 @@ class CmdUserInput {
 	}
 	def nonInteractMode=false
 	def String work(Collection<String> targetProjectNames, envConfFileName){
+		println "============命令行输入模块================"
+		println "要部署的工程：${targetProjectNames}"
+		println "使用的环境配置文件：${envConfFileName}\n"
 		/*
 		 * 获取工程预定义Meta
 		 */
