@@ -39,16 +39,18 @@ targetProjectNames.each { it->
 	}
 }
 
-
+/*
 //准备：环境配置文件
-Path source = FileSystems.getDefault().getPath("${projectRootFolder}/src/main/resources/localhost_mac/envConf.json")
+Path source = FileSystems.getDefault().getPath("${projectRootFolder}/${envConfFileName}")
 Path target = FileSystems.getDefault().getPath("${projectRootFolder}/src/main/resources/envConf.json")
 Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING)
+println "复制 环境配置文件 ${source.toFile().absolutePath} 到 ${target.toFile().absolutePath}"
+*/
 
 /*
  * 读取用户输入，产生Conf文件
  */
-def confFilePath = new CmdUserInput().work(targetProjectNames as List,envConfFileName)
+def confFilePath = new CmdUserInput().work(targetProjectNames as List,"${projectRootFolder}/${envConfFileName}")
 //new File("/tmp/docker-deploy/config/").mkdirs()
 
 
