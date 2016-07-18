@@ -17,7 +17,7 @@ class TestExtendDockerClientImpl {
     def containerId
     @BeforeTest
     def void setUp(){
-        Tool.extendLog4j()
+        Tool.extendSlf4j()
         DockerTool.extendDockerClientImpl()
         dClient = new DockerClientImpl()
         def containerConfig = ["Cmd"   : [],

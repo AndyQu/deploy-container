@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true">
+	<!-- <appender name="infoAppender"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>debug</level>
+		</filter>
+		<File>/tmp/docker-deploy/all.log</File>
+		<Append>true</Append>
+		<encoder>
+			<pattern>[%d{HH:mm:ss.SSS}][%-5level][%logger{0}] - %msg%n</pattern>
+			<pattern>%d{HH:mm:ss.SSS} %-5level %logger{0} %class{0} %line - %msg%n</pattern>
+		</encoder>
+
+		<triggeringPolicy
+			class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+			<maxFileSize>300KB</maxFileSize>
+		</triggeringPolicy>
+
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>/tmp/docker-deploy/all.%d{yyyy-MM-dd}.%i.log
+			</fileNamePattern>
+			<maxFileSize>300KB</maxFileSize>
+			<maxHistory>3</maxHistory>
+		</rollingPolicy>
+
+	</appender> -->
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<!-- encoders are assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder 
+			by default -->
+		<!-- <filter class="ch.qos.logback.classic.filter.LevelFilter"> <level>INFO</level> 
+			<onMatch>ACCEPT</onMatch> <onMismatch>ACCEPT</onMismatch> </filter> -->
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>INFO</level>
+		</filter>
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} %-5level %logger{0} %class{0} %line - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<root level="INFO">
+		<appender-ref ref="STDOUT" />
+	</root>
+</configuration>
