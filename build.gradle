@@ -44,3 +44,8 @@ run {
         args = project.getProperty("args").split(",").toList()
     }
 }
+
+
+task writeClasspath << {
+	new File("/tmp/classpath.txt").text = configurations.runtime.asPath
+}
