@@ -2,7 +2,7 @@
 基于Docker，将Project部署到container中。
 
 ## Eclipse需要安装的工具
-1. [Groovy-Eclipse](https://github.com/groovy/groovy-eclipse/wiki)。一定要使用update site方式安装；使用marketplace有兼容性问题。
+1. [Groovy-Eclipse](https://github.com/groovy/groovy-eclipse/wiki)。一定要使用链接中的update site方式安装；使用marketplace有兼容性问题。并且要与Eclipse版本匹配，否则无法安装成功。
 2. Gradle
 3. minimal gradle editor（编辑gradle文件）
 
