@@ -31,9 +31,6 @@ class TopControl {
 		}
 		def targetProjectNames = args[2].split ";"
 
-		println "ps axu".execute().text
-		System.exit(1);
-
 		/*
 		 * 校验：工程名是有效
 		 */
