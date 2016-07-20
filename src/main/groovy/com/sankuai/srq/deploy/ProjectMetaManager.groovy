@@ -9,16 +9,21 @@ class ProjectMetaManager {
 	
 	def static ProjectMetaManager _ins=null
 	
-	def pFolder="/tmp/docker-deploy"
-	def metasFolder="${pFolder}/deploy_sys_project_meta/"
+	def pFolder
+	def metasFolder
 	def nameMetaMap=[:]
 	def nameBashMap=[:]
 	
 	def static ProjectMetaManager getInstance(){
 		if(_ins==null){
-			_ins=new ProjectMetaManager();
+			_ins=new ProjectMetaManager(EnvConfig.config);
 		}
 		_ins
+	}
+	
+	ProjectMetaManager(envConfig){
+		pFolder=envConfig.workFolder
+		metasFolder="${pFolder}/deploy_sys_project_meta/"		
 	}
 	
 	def updateData(){

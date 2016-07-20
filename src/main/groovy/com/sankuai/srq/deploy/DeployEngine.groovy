@@ -110,7 +110,7 @@ git submodule update --init --recursive
          * */
         String dockerName = generateContainerName(ownerName,pMetaList) 
 		
-        contextFolderPath = "/tmp/docker-deploy/${dockerName}/"
+        contextFolderPath = "${jsonData.workFolder}/${dockerName}/"
 		configureLogger(contextFolderPath)
 
         /**

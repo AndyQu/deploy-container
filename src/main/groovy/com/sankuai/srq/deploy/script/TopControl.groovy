@@ -8,8 +8,10 @@ import java.nio.file.Files
 import com.sankuai.srq.deploy.CmdUserInput
 import com.sankuai.srq.deploy.DeployEngine
 import com.sankuai.srq.deploy.ProjectMeta
-import com.sankuai.srq.deploy.ProjectMetaManager;
+import com.sankuai.srq.deploy.ProjectMetaManager
+import com.sankuai.srq.deploy.EnvConfig
 
+import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 import org.slf4j.MDC
 
@@ -20,6 +22,9 @@ class TopControl {
 	static void main(String[] args){
 		def projectRootFolder=args[0]
 		def envConfFileName=args[1]
+		
+		def jsonSlurper = new JsonSlurper()
+		EnvConfig.config = jsonSlurper.parse(new FileReader(new File(envConfFileName)))
 
 		//是否指定了工程名称
 		ProjectMetaManager.getInstance().updateData()
@@ -53,20 +58,16 @@ class TopControl {
 		 * 读取用户输入，产生Conf文件
 		 */
 		def confFilePath = new CmdUserInput().work(targetProjectNames as List,"${projectRootFolder}/${envConfFileName}")
-		//new File("/tmp/docker-deploy/config/").mkdirs()
 
-
+		//合并：环境配置
+		def json = objsToJson(jsonSlurper.parse(new File(confFilePath)), EnvConfig.config)
+		println("部署配置:${json}")
 		/*
 		 * 开始部署
 		 */
-		/*
-		 RuntimeMXBean rt = ManagementFactory.getRuntimeMXBean();
-		 String pid = rt.getName();
-		 MDC.put("PID", pid);
-		 */
-		def jsonSlurper = new JsonSlurper();
-		def jsonData = jsonSlurper.parse(new FileReader(new File(confFilePath)))
-
+		def jsonData = jsonSlurper.parse(json)
+		EnvConfig.config=jsonData
+		
 		println "useDockerSock:${jsonData.useDockerSock}"
 		DeployEngine engine=null
 		if(jsonData.useDockerSock==1){
@@ -76,5 +77,9 @@ class TopControl {
 		}
 		ProjectMetaManager.getInstance().updateData()
 		engine.deploy(jsonData.ownerName, jsonData.projects as List<ProjectMeta>, jsonData.imgName, jsonData)
+	}
+	
+	def static objsToJson(objA, objB){
+		new JsonBuilder(objA+objB).toPrettyString()
 	}
 }
