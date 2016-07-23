@@ -48,5 +48,5 @@ run {
 
 
 task writeClasspath << {
-	new File("/tmp/classpath.txt").text = configurations.runtime.asPath
+	new File("classpath.txt").text = configurations.runtime.asPath
 }
