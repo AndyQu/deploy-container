@@ -9,7 +9,7 @@ import com.sankuai.srq.deploy.CmdUserInput
 import com.sankuai.srq.deploy.DeployEngine
 import com.sankuai.srq.deploy.ProjectMeta
 import com.sankuai.srq.deploy.ProjectMetaManager
-import com.sankuai.srq.deploy.EnvConfig
+import com.sankuai.srq.deploy.DeployContext
 
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
@@ -22,9 +22,12 @@ class TopControl {
 	static void main(String[] args){
 		def projectRootFolder=args[0]
 		def envConfFileName=args[1]
+		DeployContext context = new DeployContext()
 		
+		//建立部署的Context
 		def jsonSlurper = new JsonSlurper()
-		EnvConfig.config = jsonSlurper.parse(new FileReader(new File(envConfFileName)))
+		context.hostConfig = jsonSlurper.parse(new FileReader(new File(envConfFileName)))
+		ProjectMetaManager.initInstance(context)
 
 		//是否指定了工程名称
 		ProjectMetaManager.getInstance().updateData()
@@ -60,23 +63,22 @@ class TopControl {
 		def confFilePath = new CmdUserInput().work(targetProjectNames as List,"${projectRootFolder}/${envConfFileName}")
 
 		//合并：环境配置
-		def json = objsToJson(jsonSlurper.parse(new File(confFilePath)), EnvConfig.config)
+		def json = objsToJson(jsonSlurper.parse(new File(confFilePath)), context.hostConfig)
 		println("部署配置:${json}")
 		/*
 		 * 开始部署
 		 */
-		def jsonData = jsonSlurper.parse(json)
-		EnvConfig.config=jsonData
+		context.config = jsonSlurper.parseText(json)
 		
-		println "useDockerSock:${jsonData.useDockerSock}"
+		println "useDockerSock:${context.config.useDockerSock}"
 		DeployEngine engine=null
-		if(jsonData.useDockerSock==1){
+		if(context.config.useDockerSock==1){
 			engine = new DeployEngine()
 		}else{
-			engine = new DeployEngine(jsonData.dockerDaemon.host, jsonData.dockerDaemon.port)
+			engine = new DeployEngine(context.config.dockerDaemon.host, context.config.dockerDaemon.port)
 		}
 		ProjectMetaManager.getInstance().updateData()
-		engine.deploy(jsonData.ownerName, jsonData.projects as List<ProjectMeta>, jsonData.imgName, jsonData)
+		engine.deploy(context.config.ownerName, context.config.projects as List<ProjectMeta>, context.config.imgName, context.config)
 	}
 	
 	def static objsToJson(objA, objB){

@@ -101,7 +101,7 @@ git submodule update --init --recursive
 		logger.info("\n====================部署项目${pMeta.projectName}-[结束]=======================")
     }
 
-    def deploy(String ownerName, List<ProjectMeta> pMetaList, String imgName, jsonData) {
+    def deploy(String ownerName, List<ProjectMeta> pMetaList, String imgName, contextConfig) {
         def contextFolderPath = null
         def deployScriptPath = null
         /**
@@ -110,7 +110,7 @@ git submodule update --init --recursive
          * */
         String dockerName = generateContainerName(ownerName,pMetaList) 
 		
-        contextFolderPath = "${jsonData.workFolder}/${dockerName}/"
+        contextFolderPath = "${contextConfig.workFolder}/${dockerName}/"
 		configureLogger(contextFolderPath)
 
         /**
@@ -135,7 +135,7 @@ git submodule update --init --recursive
         /**
          * 需要挂载的目录:
          */
-        def (allMountPoints, nonLibMountPoints) = calcMountPoints(pMetaList, dockerName, contextFolderPath, jsonData)
+        def (allMountPoints, nonLibMountPoints) = calcMountPoints(pMetaList, dockerName, contextFolderPath, contextConfig)
         
         /**
          * 创建/docker-deploy目录

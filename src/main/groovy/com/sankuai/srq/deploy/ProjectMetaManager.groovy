@@ -14,15 +14,20 @@ class ProjectMetaManager {
 	def nameMetaMap=[:]
 	def nameBashMap=[:]
 	
+	def static void initInstance(DeployContext context){
+		_ins=new ProjectMetaManager(context);
+		_ins.updateData()
+	}		
+	
 	def static ProjectMetaManager getInstance(){
 		if(_ins==null){
-			_ins=new ProjectMetaManager(EnvConfig.config);
+			
 		}
 		_ins
 	}
 	
-	ProjectMetaManager(envConfig){
-		pFolder=envConfig.workFolder
+	ProjectMetaManager(DeployContext context){
+		pFolder=context.getWorkFolder()
 		metasFolder="${pFolder}/deploy_sys_project_meta/"		
 	}
 	
