@@ -26,7 +26,7 @@ class DeployEngine {
         Tool.extendSlf4j()
         DockerTool.extendDockerClientImpl()
     }
-    def static final logger = LoggerFactory.getLogger("DeployEngine")
+    def static logger = LoggerFactory.getLogger("DeployEngine")
     def DockerClient dClient
     def String host
 
@@ -81,6 +81,12 @@ git submodule update --init --recursive
 		new File(ProjectMetaManager.getInstance().getProjectBashFile(pMeta.projectName)).withReader {
 			deployFile << it
 		}
+		
+		logger.info("Finnaly generated Bash Script Content:")
+		deployFile.readLines().each {
+			logger.info(it)
+		}
+		logger.info("\n\n")
 
         /**
          * 使用docker exec API接口, 执行自动产生的bash脚本
@@ -118,7 +124,7 @@ git submodule update --init --recursive
          */
         Boolean dockerExists = false
         def container = dClient.queryContainerName(dockerName)
-		logger.info "event_name=检查是否存在同名Docker_Container name=${dockerName} fetched_id=${container?.Id}"
+		logger.info "event_name=检查是否存在同名Docker_Container name=${dockerName}"
 		
 		/**
 		 * 停止/删除已存在的container
@@ -426,7 +432,7 @@ git submodule update --init --recursive
 		*/
 	}
 	
-	def configureLogger(String logFileFolder){
+	def ch.qos.logback.classic.Logger configureLogger(String logFileFolder){
 		//https://github.com/tony19/logback-android/wiki/Appender-Notes#configuration-in-code
 		logger.info "\n========================重新配置Logback-[开始]=================================="
 		LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -436,6 +442,7 @@ git submodule update --init --recursive
 //		lc.reset()
 		
 		RollingFileAppender<ILoggingEvent> rollingFileAppender = new RollingFileAppender<ILoggingEvent>();
+		rollingFileAppender.setName("appenderForDeploy")
 		rollingFileAppender.setAppend(true);
 		rollingFileAppender.setContext(lc);
 		rollingFileAppender.setFile("${logFileFolder}/deploy.log");
@@ -463,10 +470,11 @@ git submodule update --init --recursive
 		
 		rollingFileAppender.start();
 		
-		ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("DeployEngine");
-		logger.setAdditive(true)
-		logger.setLevel(ch.qos.logback.classic.Level.INFO)
-		logger.addAppender(rollingFileAppender)
+		ch.qos.logback.classic.Logger newLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("DeployEngine");
+		newLogger.setAdditive(true)
+		newLogger.setLevel(ch.qos.logback.classic.Level.DEBUG)
+//		logger.setLevel(ch.qos.logback.classic.Level.INFO)
+		newLogger.addAppender(rollingFileAppender)
 		
 		StatusPrinter.print(lc);
 		logger.info "\n========================重新配置Logback-[结束]==================================\n"

@@ -13,6 +13,9 @@ class ProjectMetaManager {
 	def metasFolder
 	def nameMetaMap=[:]
 	def nameBashMap=[:]
+	def branch="master"
+//	def branch="testWindows"
+//	def branch="testI"
 	
 	def static void initInstance(DeployContext context){
 		_ins=new ProjectMetaManager(context);
@@ -35,14 +38,16 @@ class ProjectMetaManager {
 		new File(pFolder).mkdirs()
 		
 		def f = new File(metasFolder)
-		if(! f.exists()){
-			logger.info "${f} 不存在. DO: git clone https://github.com/AndyQu/deploy_sys_project_meta.git"
-			logger.info "git clone https://github.com/AndyQu/deploy_sys_project_meta.git".execute(null, new File(pFolder)).text
+		if(f.exists()){
+			f.deleteDir()
+			logger.info "删除 ${f}"
 		}else{
-			logger.info "${f} 已存在. DO: git checkout master;git pull"
-			logger.info "git checkout master".execute(null, new File(metasFolder)).text
-			logger.info "git pull".execute(null, new File(metasFolder)).text
+			logger.info "${f} 不存在. "
 		}
+		logger.info "DO: git clone https://github.com/AndyQu/deploy_sys_project_meta.git"
+		logger.info "git clone https://github.com/AndyQu/deploy_sys_project_meta.git".execute(null, new File(pFolder)).text
+		logger.info "DO: git checkout -b ${branch} --track origin/${branch}"
+		logger.info "git checkout -b ${branch} --track origin/${branch}".execute(null, new File(metasFolder)).text
 		_parse()
 	}
 	

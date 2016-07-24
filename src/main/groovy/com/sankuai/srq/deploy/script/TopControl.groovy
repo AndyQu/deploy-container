@@ -30,7 +30,6 @@ class TopControl {
 		ProjectMetaManager.initInstance(context)
 
 		//是否指定了工程名称
-		ProjectMetaManager.getInstance().updateData()
 		def validProjectNames = ProjectMetaManager.getInstance().getAllProjectNames()
 
 		if (args.size() < 3) {
