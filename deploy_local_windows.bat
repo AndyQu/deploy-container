@@ -4,6 +4,7 @@ set targetProjectNames=%1%
 echo %envConfFileName%
 echo %targetProjectNames%
 
+::必须使用call命令来调用gradle，否则gradle执行完之后，bat脚本会退出
 call ./gradlew.bat writeClasspath
 setlocal ENABLEDELAYEDEXPANSION
 set vidx=0
