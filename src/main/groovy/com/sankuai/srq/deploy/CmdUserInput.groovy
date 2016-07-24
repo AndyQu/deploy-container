@@ -13,7 +13,7 @@ class CmdUserInput {
 	static{
 		Tool.extendBufferedReader()
 	}
-	def nonInteractMode=true
+	def nonInteractMode=false
 	def String work(Collection<String> targetProjectNames, envConfFileName){
 		println "============命令行输入模块================"
 		println "要部署的工程：${targetProjectNames}"
