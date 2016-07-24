@@ -1,0 +1,10 @@
+{
+    "imgName":"andyqu/deploy_img:1.1",
+    "useDockerSock":1,
+    "dockerDaemon":{
+        "host":"127.0.0.1",
+        "port":2375
+    },
+    "userFolder":"C:/Users/Administrator/",
+    "workFolder":"d:/tmp/docker-deploy"
+}

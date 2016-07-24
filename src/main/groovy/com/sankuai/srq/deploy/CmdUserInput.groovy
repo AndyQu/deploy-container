@@ -31,23 +31,16 @@ class CmdUserInput {
 			config=readInParametersAndConfig(metas)
 		}
 
-		//合并：环境配置
-		def jsonSlurper = new JsonSlurper()
-		def json = objsToJson(config, jsonSlurper.parse(new FileReader(new File(envConfFileName))))
-		println("部署配置:${json}")
-
 		//输出最终Conf文件
 		def name="/tmp/"+targetProjectNames.join("_")+".json"
 		def outputFile = new File(name)
 		outputFile.delete()
-		outputFile.write(json, "utf-8")
+		outputFile.write(new JsonBuilder(config).toPrettyString(), "utf-8")
 		
 		name
 	}
 
-	def objsToJson(objA, objB){
-		new JsonBuilder(objA+objB).toPrettyString()
-	}
+	
 	
 	def nonInteractiveConfig(Collection<ProjectMeta> pMetaList){
 		def ownerName="anony"
