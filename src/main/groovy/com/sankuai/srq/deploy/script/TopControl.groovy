@@ -7,8 +7,8 @@ import java.nio.file.Files
 
 import com.sankuai.srq.deploy.CmdUserInput
 import com.sankuai.srq.deploy.DeployEngine
-import com.sankuai.srq.deploy.ProjectMeta
 import com.sankuai.srq.deploy.ProjectMetaManager
+import com.sankuai.srq.deploy.notused.ProjectMeta;
 import com.sankuai.srq.deploy.DeployContext
 
 import groovy.json.JsonBuilder

@@ -1,11 +1,11 @@
 package com.sankuai.srq.deploy
 
-import java.util.Collection;
+import java.util.Collection
 
-import com.sankuai.srq.deploy.InstanceConfig
-import com.sankuai.srq.deploy.ProjectMeta
 import com.sankuai.srq.deploy.ProjectMetaManager;
 import com.sankuai.srq.deploy.Tool
+import com.sankuai.srq.deploy.notused.ProjectMeta;
+
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 

@@ -1,4 +1,4 @@
-package com.sankuai.srq.deploy
+package com.sankuai.srq.deploy.notused
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString

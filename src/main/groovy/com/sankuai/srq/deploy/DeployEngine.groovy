@@ -18,6 +18,9 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.event.LoggingEvent
 
+import com.sankuai.srq.deploy.notused.PortMeta;
+import com.sankuai.srq.deploy.notused.ProjectMeta;
+
 import ch.qos.logback.core.util.StatusPrinter
 
 
