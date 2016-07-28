@@ -1,11 +1,8 @@
-package com.sankuai.srq.deploy
+package com.andyqu.docker.deploy
 
 import java.util.Collection
 
-import com.sankuai.srq.deploy.ProjectMetaManager;
-import com.sankuai.srq.deploy.Tool
-import com.sankuai.srq.deploy.notused.ProjectMeta;
-
+import com.andyqu.docker.deploy.notused.ProjectMeta
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 

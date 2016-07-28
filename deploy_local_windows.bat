@@ -20,4 +20,4 @@ echo %gcp%
 ::./gradlew --console=plain -Pmain=top_control -Pargs="%envConfFileName%,%targetProjectNames%" run
 
 call ./gradlew.bat clean jar
-java -cp "%gcp%" com.sankuai.srq.deploy.script.TopControl %envConfFileName% %targetProjectNames%
+java -cp "%gcp%" com.andyqu.docker.deploy.script.TopControl %envConfFileName% %targetProjectNames%

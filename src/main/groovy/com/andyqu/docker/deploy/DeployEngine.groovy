@@ -1,4 +1,4 @@
-package com.sankuai.srq.deploy
+package com.andyqu.docker.deploy
 
 import ch.qos.logback.classic.LoggerContext
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder
@@ -18,10 +18,9 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.event.LoggingEvent
 
-import com.sankuai.srq.deploy.notused.PortMeta;
-import com.sankuai.srq.deploy.notused.ProjectMeta;
-
 import ch.qos.logback.core.util.StatusPrinter
+import com.andyqu.docker.deploy.notused.PortMeta
+import com.andyqu.docker.deploy.notused.ProjectMeta
 
 
 class DeployEngine {

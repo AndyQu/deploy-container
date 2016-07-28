@@ -1,4 +1,4 @@
-package com.sankuai.srq.deploy
+package com.andyqu.docker.deploy
 
 import de.gesellix.docker.client.DockerClientImpl
 import de.gesellix.docker.client.DockerResponse

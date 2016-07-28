@@ -1,10 +1,9 @@
-package com.sankuai.srq.deploy
+package com.andyqu.docker.deploy
 //import groovy.json.JsonBuilder
+import com.andyqu.docker.deploy.notused.ProjectMeta
 import groovy.json.JsonSlurper
 
 import org.slf4j.LoggerFactory
-
-import com.sankuai.srq.deploy.notused.ProjectMeta;
 
 class ProjectMetaManager {
 	def static final logger = LoggerFactory.getLogger("DeployEngine")

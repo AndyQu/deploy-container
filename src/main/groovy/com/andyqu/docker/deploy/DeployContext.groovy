@@ -1,4 +1,4 @@
-package com.sankuai.srq.deploy
+package com.andyqu.docker.deploy
 
 class DeployContext {
 	def hostConfig=null
