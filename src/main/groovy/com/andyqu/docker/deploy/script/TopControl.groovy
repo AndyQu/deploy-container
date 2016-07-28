@@ -8,7 +8,7 @@ import java.nio.file.Files
 import com.andyqu.docker.deploy.CmdUserInput
 import com.andyqu.docker.deploy.DeployEngine
 import com.andyqu.docker.deploy.ProjectMetaManager
-import com.andyqu.docker.deploy.notused.ProjectMeta;
+import com.andyqu.docker.deploy.model.ProjectMeta;
 import com.andyqu.docker.deploy.DeployContext
 
 import groovy.json.JsonBuilder

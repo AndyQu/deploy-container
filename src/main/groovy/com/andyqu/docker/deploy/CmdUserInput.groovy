@@ -2,7 +2,7 @@ package com.andyqu.docker.deploy
 
 import java.util.Collection
 
-import com.andyqu.docker.deploy.notused.ProjectMeta
+import com.andyqu.docker.deploy.model.ProjectMeta
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 

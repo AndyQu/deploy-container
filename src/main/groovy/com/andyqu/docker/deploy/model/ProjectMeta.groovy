@@ -1,4 +1,4 @@
-package com.andyqu.docker.deploy.notused
+package com.andyqu.docker.deploy.model
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString

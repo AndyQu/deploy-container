@@ -1,4 +1,6 @@
 {
+	"serverAddress":"localhost",
+	"serverPort":27017,
 	"username":"deployer",
 	"database":"deploy_system",
 	"password":"ridiculus_world"

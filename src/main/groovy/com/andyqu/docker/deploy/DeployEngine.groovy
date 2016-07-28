@@ -19,8 +19,8 @@ import org.slf4j.LoggerFactory
 import org.slf4j.event.LoggingEvent
 
 import ch.qos.logback.core.util.StatusPrinter
-import com.andyqu.docker.deploy.notused.PortMeta
-import com.andyqu.docker.deploy.notused.ProjectMeta
+import com.andyqu.docker.deploy.model.PortMeta
+import com.andyqu.docker.deploy.model.ProjectMeta
 
 
 class DeployEngine {

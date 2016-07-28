@@ -1,6 +1,6 @@
 package com.andyqu.docker.deploy
 //import groovy.json.JsonBuilder
-import com.andyqu.docker.deploy.notused.ProjectMeta
+import com.andyqu.docker.deploy.model.ProjectMeta
 import groovy.json.JsonSlurper
 
 import org.slf4j.LoggerFactory
