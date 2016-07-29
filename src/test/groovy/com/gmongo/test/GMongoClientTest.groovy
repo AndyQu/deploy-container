@@ -33,7 +33,8 @@ class GMongoClientTest {
 	
 	@BeforeTest
 	def void setup(){
-		credentials = MongoCredential.createMongoCRCredential(username,  database,  password as char[])
+		//notice:这里的"admin"指的是用于获取用户数据的database，不是用户拥有权限的database
+		credentials = MongoCredential.createMongoCRCredential(username,  "admin",  password as char[])
 //		client = new GMongoClient(new ServerAddress( "${host}:${port}"), [credentials])
 //		credentials = MongoCredential.createScramSha1Credential(username, database, password as char[])
 		client = new GMongoClient(new ServerAddress( host,  port), [credentials])
