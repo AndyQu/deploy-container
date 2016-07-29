@@ -23,7 +23,8 @@ class GMongoClientTest {
 	def username="unit_testor"
 	def password="123456"
 	def database="unit_test"
-	def host="localhost"
+//	def host="localhost"
+	def host="10.4.242.144"
 	def port=27017
 	
 	def credentials
@@ -32,10 +33,11 @@ class GMongoClientTest {
 	
 	@BeforeTest
 	def void setup(){
-//		credentials = MongoCredential.createMongoCRCredential(username,  database,  password as char[])
-		credentials = MongoCredential.createScramSha1Credential(username, database, password as char[])
-		
+		credentials = MongoCredential.createMongoCRCredential(username,  database,  password as char[])
+//		client = new GMongoClient(new ServerAddress( "${host}:${port}"), [credentials])
+//		credentials = MongoCredential.createScramSha1Credential(username, database, password as char[])
 		client = new GMongoClient(new ServerAddress( host,  port), [credentials])
+
 		db=client.getDB(database)
 		logger.info("event_name=setup_mongodb_connection client={}", ReflectionToStringBuilder.toString(client, ToStringStyle.MULTI_LINE_STYLE))
 	}
