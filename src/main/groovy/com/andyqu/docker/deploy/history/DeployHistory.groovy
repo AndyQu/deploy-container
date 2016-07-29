@@ -1,6 +1,7 @@
 package com.andyqu.docker.deploy.history
 
 class DeployHistory {
+	String projectName;
 	int startTimeStamp;
 	String startTime;
 	int endTimeStamp;
