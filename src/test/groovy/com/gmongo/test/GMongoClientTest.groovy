@@ -54,8 +54,6 @@ class GMongoClientTest {
 			new DeployHistory(
 				startTimeStamp:time,
 				endTimeStamp:time+100,
-				startTime:new Date().getDateTimeString(),
-				endTime:new Date().getDateTimeString(),
 				projectName:"webhivesql",
 				containerName:"annoy-master-webhivesql",
 				containerId:"e12eba6ee03b",
@@ -63,10 +61,8 @@ class GMongoClientTest {
 				hostIp:"172.26.19.70"
 			),
 			new DeployHistory(
-				startTimeStamp:time+400,
-				endTimeStamp:time+800,
-				startTime:new Date().getDateTimeString(),
-				endTime:new Date().getDateTimeString(),
+				startTimeStamp:time+2000,
+				endTimeStamp:time+3000,
 				projectName:"webhivesql",
 				containerName:"andy-dev-webhivesql",
 				containerId:"e12eba6ee03b",
