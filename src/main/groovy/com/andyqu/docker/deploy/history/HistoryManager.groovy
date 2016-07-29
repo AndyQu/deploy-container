@@ -4,6 +4,7 @@ import org.apache.commons.beanutils.BeanUtils
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory
 
+import com.andyqu.docker.deploy.Tool;
 import com.gmongo.GMongoClient
 import com.mongodb.DB
 import com.mongodb.DBCursor
@@ -14,35 +15,45 @@ import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 
 class HistoryManager {
-	def static final Logger logger = LoggerFactory.getLogger(HistoryManager)
+	static final Logger logger = LoggerFactory.getLogger("DeployEngine")
+	static HistoryManager _ins = null
+	static String authenticationDatabase="admin"
 	
 	def mongoConfig
 	def credentials
 	GMongoClient client
 	DB db
-	static String authenticationDatabase="admin"
+	
+	static HistoryManager getInstance(){
+		if(_ins==null){
+			Tool.extendObject()
+			_ins=new HistoryManager()
+		}
+		return _ins
+	}
+	
 	HistoryManager(){
 		def jsonSlurper = new JsonSlurper()
-		this.mongoConfig = jsonSlurper.parse(new File(HistoryManager.class.getResource('/mongo.json').getPath()))
+		this.mongoConfig = jsonSlurper.parse(HistoryManager.class.getResource('/mongodb.json'))
 		credentials = MongoCredential.createMongoCRCredential(mongoConfig.username, authenticationDatabase, mongoConfig.password as char[])
-		client = new GMongoClient(new ServerAddress(mongoConfig.host, mongoConfig.port), [credentials])
-		db = client.getDB("deploy_system")	
+		client = new GMongoClient(new ServerAddress(mongoConfig.serverAddress, mongoConfig.serverPort), [credentials])
+		db = client.getDB(mongoConfig.database)	
 	}
 	def save(DeployHistory history){
-		String projectName=history.getProjectName()
-		db[projectName].insert(BeanUtils.describe(history))
+		def projectNames=history.getProjectNames()
+		db[getCollectionName(projectNames)].insert(history.toMap())
 		logger.info("event_name=save_deployhistory history_item={}", new JsonBuilder(history).toPrettyString())
 	}
 	
 	/**
 	 * 
-	 * @param projectName
+	 * @param projectNames
 	 * @param deployName 一次部署的名称，目前和container名称相同
 	 * @return
 	 */
-	def fetchLatestHistory(String projectName, String deployName){
-		DBCursor cursor = db[projectName].find([containerName:deployName])
-		logger.info("event_name=fetchLatestHistory projectName={} deployName={}", projectName, deployName)
+	def fetchLatestHistory(def projectNames, String deployName){
+		DBCursor cursor = db[getCollectionName(projectNames)].find([containerName:deployName])
+		logger.info("event_name=fetchLatestHistory projectNames={} deployName={}", projectNames, deployName)
 		if(cursor.hasNext()){
 			DBObject result = cursor.next()
 			logger.info("fetched_history={}", result)
@@ -51,5 +62,9 @@ class HistoryManager {
 			logger.warn("no_history")
 			null
 		}
+	}
+	
+	static String getCollectionName(projectNames){
+		projectNames.join('_')
 	}
 }

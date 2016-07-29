@@ -3,12 +3,16 @@ package com.andyqu.docker.deploy
 import de.gesellix.docker.client.DockerClientImpl
 import de.gesellix.docker.client.DockerResponse
 import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import java.security.MessageDigest
 
+import com.andyqu.docker.deploy.history.DeployHistory
+
 class Tool {
+	static JsonSlurper slurper = new JsonSlurper()
     def static generateMD5(String s) {
         MessageDigest digest = MessageDigest.getInstance("MD5")
         digest.update(s.bytes);
@@ -55,6 +59,12 @@ class Tool {
                 readLine()
         }
     }
+	
+	def static void extendObject(){
+		Object.metaClass.toMap = {
+				return slurper.parseText(new JsonBuilder(delegate).toString())
+		}
+	}
 }
 
 
