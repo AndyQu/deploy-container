@@ -115,7 +115,7 @@ git submodule update --init --recursive
 		DeployHistory history=new DeployHistory(
 			contextConfig:contextConfig, 
 			startTimeStamp:System.currentTimeSeconds(),
-			hostName:InetAddress.getLocalHost().canonicalHostName,
+			hostName:InetAddress.getLocalHost().getHostName(),
 			hostIp:InetAddress.getLocalHost().getHostAddress()
 		)
         def contextFolderPath = null
