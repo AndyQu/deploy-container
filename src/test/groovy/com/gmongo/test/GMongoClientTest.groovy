@@ -23,10 +23,10 @@ import org.apache.commons.beanutils.BeanUtils
 class GMongoClientTest {
 	def static final Logger logger = LoggerFactory.getLogger(GMongoClientTest)
 	
+	//使用美团办公云的mongodb。如果不能直接连，则先用anyconnect连vpn
 	def username="unit_testor"
 	def password="123456"
 	def database="unit_test"
-//	def host="localhost"
 	def host="10.4.242.144"
 	def port=27017
 	
