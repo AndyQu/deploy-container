@@ -1,4 +1,4 @@
-package com.sankuai.srq.deploy
+package com.andyqu.docker.deploy.model
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString

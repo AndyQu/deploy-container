@@ -22,6 +22,16 @@ dependencies {
 	//加入groovy-all，使得classpath中的lib包含运行groovy main class所需要的所有依赖包，无需依赖安装在Host主机上的Groovy
 	compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.4'
 
+	// https://mvnrepository.com/artifact/com.gmongo/gmongo
+	//使用1.5版本，才能够使用ScramSha1Credential的验证方法与mongodb进行连接
+	compile group: 'com.gmongo', name: 'gmongo', version: '1.5'
+	
+	// https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+	
+	// https://mvnrepository.com/artifact/commons-beanutils/commons-beanutils
+	compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.2'
+	
     testCompile 'org.testng:testng:6.8.21'
 }
 
@@ -41,7 +51,7 @@ run {
     classpath = sourceSets.main.runtimeClasspath
     standardInput = java.lang.System.in
     if (project.hasProperty('main')) {
-        main = "com.sankuai.srq.deploy.script.${project.getProperty('main')}"
+        main = "com.andyqu.docker.deploy.script.${project.getProperty('main')}"
         args = project.getProperty("args").split(",").toList()
     }
 }

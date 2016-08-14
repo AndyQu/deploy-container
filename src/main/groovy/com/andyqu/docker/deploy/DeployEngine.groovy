@@ -1,4 +1,4 @@
-package com.sankuai.srq.deploy
+package com.andyqu.docker.deploy
 
 import ch.qos.logback.classic.LoggerContext
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder
@@ -19,6 +19,10 @@ import org.slf4j.LoggerFactory
 import org.slf4j.event.LoggingEvent
 
 import ch.qos.logback.core.util.StatusPrinter
+import com.andyqu.docker.deploy.history.DeployHistory
+import com.andyqu.docker.deploy.history.HistoryManager;
+import com.andyqu.docker.deploy.model.PortMeta
+import com.andyqu.docker.deploy.model.ProjectMeta
 
 
 class DeployEngine {
@@ -108,6 +112,12 @@ git submodule update --init --recursive
     }
 
     def deploy(String ownerName, List<ProjectMeta> pMetaList, String imgName, contextConfig) {
+		DeployHistory history=new DeployHistory(
+			contextConfig:contextConfig, 
+			startTimeStamp:System.currentTimeSeconds(),
+			hostName:InetAddress.getLocalHost().getHostName(),
+			hostIp:InetAddress.getLocalHost().getHostAddress()
+		)
         def contextFolderPath = null
         def deployScriptPath = null
         /**
@@ -115,6 +125,7 @@ git submodule update --init --recursive
          *
          * */
         String dockerName = generateContainerName(ownerName,pMetaList) 
+		history.setContainerName(dockerName)
 		
         contextFolderPath = "${contextConfig.workFolder}/${dockerName}/"
 		configureLogger(contextFolderPath)
@@ -181,12 +192,14 @@ git submodule update --init --recursive
 				"Tty": true,
         ]
 		def confString=new JsonBuilder(containerConfig).toPrettyString()
+		history.setContainerConfig(containerConfig)
         logger.info("event_name=将要创建的container信息 container_config=\n${confString}")
 		
 		
 		logger.info("\n====================创建并启动container-[开始]=======================")
         def response = dClient.createContainer(containerConfig, [name: dockerName])
 		def containerId = response.content.Id
+		history.setContainerId(containerId)
         if (response.status.success) {
 			logger.info "event_name=创建container成功 container_id=${containerId}"
             response = dClient.startContainer(containerId)
@@ -197,6 +210,9 @@ git submodule update --init --recursive
 				System.exit(1)
 			}
         } else {
+			history.setStatus(false)
+			history.setEndTimeStamp(System.currentTimeSeconds())
+			
             logger.error("event_name=创建container失败 docker_name=${dockerName} response=${response}")
             throw new Exception("创建container失败:${dockerName}.")
         }
@@ -207,6 +223,7 @@ git submodule update --init --recursive
          */
         pMetaList.each {
             pMeta ->
+				history.getProjectNames().add(pMeta.projectName)
                 _deploy(contextFolderPath, containerId, pMeta as ProjectMeta)
         }
 
@@ -215,6 +232,9 @@ git submodule update --init --recursive
         configedPortList.each {
             logger.info("主机端口:${it.PublicPort}  <->  Docker端口:${it.PrivatePort}")
         }
+		history.setEndTimeStamp(System.currentTimeSeconds())
+		history.setStatus(true)
+		HistoryManager.getInstance().save(history)
     }
 
     /**
