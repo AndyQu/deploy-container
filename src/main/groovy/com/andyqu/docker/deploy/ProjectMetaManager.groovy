@@ -5,6 +5,11 @@ import groovy.json.JsonSlurper
 
 import org.slf4j.LoggerFactory
 
+import org.eclipse.jgit.api.CloneCommand
+import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.lib.Repository
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+
 class ProjectMetaManager {
 	def static final LOGGER = LoggerFactory.getLogger("DeployEngine")
 	
@@ -54,9 +59,15 @@ class ProjectMetaManager {
 			LOGGER.info "${f} 不存在. "
 		}
 		LOGGER.info "DO: git clone https://github.com/AndyQu/deploy_sys_project_meta.git"
-		LOGGER.info "git clone https://github.com/AndyQu/deploy_sys_project_meta.git".execute(null, new File(pFolder)).text
-		LOGGER.info "DO: git checkout -b ${branch} --track origin/${branch}"
-		LOGGER.info "git checkout -b ${branch} --track origin/${branch}".execute(null, new File(metasFolder)).text
+		CloneCommand cloneCmd=new CloneCommand()
+		cloneCmd.setURI("https://github.com/AndyQu/deploy_sys_project_meta.git")
+		cloneCmd.setDirectory(new File(metasFolder))
+		cloneCmd.setBranch("master")
+		LOGGER.info "event_name=checkout_master result={}",cloneCmd.call()
+		
+//		LOGGER.info "git clone https://github.com/AndyQu/deploy_sys_project_meta.git".execute(null, new File(pFolder)).text
+//		LOGGER.info "DO: git checkout -b ${branch} --track origin/${branch}"
+//		LOGGER.info "git checkout -b ${branch} --track origin/${branch}".execute(null, new File(metasFolder)).text
 		_parse()
 	}
 	
