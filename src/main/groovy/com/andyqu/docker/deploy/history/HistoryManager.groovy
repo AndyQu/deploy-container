@@ -10,12 +10,13 @@ import com.mongodb.DB
 import com.mongodb.DBCursor
 import com.mongodb.DBObject
 import com.mongodb.MongoCredential
+import com.mongodb.MongoTimeoutException
 import com.mongodb.ServerAddress
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 
 class HistoryManager {
-	static final Logger logger = LoggerFactory.getLogger("DeployEngine")
+	static final Logger LOGGER = LoggerFactory.getLogger("DeployEngine")
 	static HistoryManager _ins = null
 	static String authenticationDatabase="admin"
 	
@@ -43,8 +44,8 @@ class HistoryManager {
 	}
 	def save(DeployHistory history){
 		def projectNames=history.getProjectNames()
-		db[getCollectionName(projectNames)].insert(history.toMap())
-		logger.info("event_name=save_deployhistory history_item={}", new JsonBuilder(history).toPrettyString())
+		db[getRealName(projectNames)].insert(history.toMap())
+		LOGGER.info("event_name=save_deployhistory history_item={}", new JsonBuilder(history).toPrettyString())
 	}
 	
 	/**
@@ -53,20 +54,42 @@ class HistoryManager {
 	 * @param deployName 一次部署的名称，目前和container名称相同
 	 * @return
 	 */
-	def fetchLatestHistory(def projectNames, String deployName){
-		DBCursor cursor = db[getCollectionName(projectNames)].find([containerName:deployName])
-		logger.info("event_name=fetchLatestHistory projectNames={} deployName={}", projectNames, deployName)
+	def DBObject fetchLatestHistory(def projectNames, String deployName){
+		DBCursor cursor = db[getRealName(projectNames)].find([containerName:deployName])
+		LOGGER.info("event_name=fetchLatestHistory projectNames={} deployName={}", projectNames, deployName)
 		if(cursor.hasNext()){
 			DBObject result = cursor.next()
-			logger.info("fetched_history={}", result)
+			LOGGER.info("fetched_history={}", result)
 			result
 		}else{
-			logger.warn("no_history")
+			LOGGER.warn("no_history")
 			null
 		}
 	}
 	
-	static String getCollectionName(projectNames){
+	/**
+	 * 
+	 * @param projectName
+	 * @return 所有的部署历史
+	 */
+	def fetchHistories(String projectName){
+		def histories=[]
+		try{
+			LOGGER.info("event_name=fetching_histories projectName={}", projectName)
+			//降序
+			db.webhivesql.find().sort(startTimeStamp:-1).each {
+				//					LOGGER.info("event_name=show_history history={}",new JsonBuilder(it).toPrettyString())
+				LOGGER.info "event_name=show_history history={}",it.toString()
+				histories.add it
+			}
+			histories
+		}catch(MongoTimeoutException e){
+			LOGGER.error "event_name=history_server_timeout projectName={} e={}", projectName, e
+			histories
+		}
+	}
+	
+	static String getRealName(projectNames){
 		projectNames.join('_')
 	}
 }
