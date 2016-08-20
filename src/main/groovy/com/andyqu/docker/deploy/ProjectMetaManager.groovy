@@ -15,12 +15,15 @@ class ProjectMetaManager {
 	def nameMetaMap=[:]
 	def nameBashMap=[:]
 	def branch="master"
+	def context
 //	def branch="testWindows"
 //	def branch="testI"
 	
 	def static void initInstance(DeployContext context){
-		_ins=new ProjectMetaManager(context);
-		_ins.updateData()
+		if(_ins==null){
+			_ins=new ProjectMetaManager();
+			_ins.setContext(context)
+		}
 	}		
 	
 	def static ProjectMetaManager getInstance(){
@@ -31,9 +34,13 @@ class ProjectMetaManager {
 		_ins
 	}
 	
-	ProjectMetaManager(DeployContext context){
+	ProjectMetaManager(){
+	}
+	def setContext(DeployContext context){
+		this.context=context
 		pFolder=context.getWorkFolder()
-		metasFolder="${pFolder}/deploy_sys_project_meta/"		
+		metasFolder="${pFolder}/deploy_sys_project_meta/"
+		updateData()
 	}
 	
 	def updateData(){
