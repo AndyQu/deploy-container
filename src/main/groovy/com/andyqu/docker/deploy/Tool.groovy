@@ -12,14 +12,14 @@ import java.security.MessageDigest
 import com.andyqu.docker.deploy.history.DeployHistory
 
 class Tool {
-	static JsonSlurper slurper = new JsonSlurper()
-    def static generateMD5(String s) {
+	JsonSlurper slurper = new JsonSlurper()
+    def  static generateMD5(String s) {
         MessageDigest digest = MessageDigest.getInstance("MD5")
         digest.update(s.bytes);
         new BigInteger(1, digest.digest()).toString(16).padLeft(32, '0')
     }
 
-    def static boolean isPortInUse(String hostName, int portNumber) {
+    def  static boolean isPortInUse(String hostName, int portNumber) {
         boolean result;
         try {
             Socket s = new Socket(hostName, portNumber);
@@ -29,7 +29,7 @@ class Tool {
             false
         }
     }
-    def static void extendSlf4j(){
+    def   extendSlf4j(){
         Logger.metaClass.trace={
             msgObj->
                 trace(new JsonBuilder(msgObj).toPrettyString())
@@ -50,27 +50,30 @@ class Tool {
             msgObj->
                 error(new JsonBuilder(msgObj).toPrettyString())
         }
+		this
     }
 
-    def static void extendBufferedReader(){
+    def   extendBufferedReader(){
         BufferedReader.metaClass.readLine={
             str->
                 print str
                 readLine()
         }
+		this
     }
 	
-	def static void extendObject(){
+	def   extendObject(){
 		Object.metaClass.toMap = {
 				return slurper.parseText(new JsonBuilder(delegate).toString())
 		}
+		this
 	}
 }
 
 
 
 class DockerTool {
-    def static void extendDockerClientImpl(){
+    def   void extendDockerClientImpl(){
         /*
         DockerClientImpl在gesellix/docker-client的15年版本中，日志器名字是logger。
         在16年版本中，日志器名字是log。
@@ -81,10 +84,10 @@ class DockerTool {
         addStopAndRemoveContainer()
 		addQueryAllContainerPorts()
     }
-    def static void addLogger(){
+    def   void addLogger(){
         DockerClientImpl.metaClass.loggeR=LoggerFactory.getLogger(DockerTool)
     }
-    def static void addQueryContainerName() {
+    def   void addQueryContainerName() {
         DockerClientImpl.metaClass.queryContainerName = {
             containerName ->
                 DockerResponse response = ps(query: [all: true, size: true])
@@ -107,7 +110,7 @@ class DockerTool {
         }
     }
 
-    def static void addStopAndRemoveContainer() {
+    def   void addStopAndRemoveContainer() {
         DockerClientImpl.metaClass.stopAndRemoveContainer = {
             containerId ->
                 DockerResponse response = stop(containerId)
@@ -126,7 +129,7 @@ class DockerTool {
         }
     }
 	
-	def static void addQueryAllContainerPorts() {
+	def   void addQueryAllContainerPorts() {
 		DockerClientImpl.metaClass.queryAllContainerPorts = {
 			DockerResponse response = ps(query: [all: true, size: true])
 			if (response.status.success) {
