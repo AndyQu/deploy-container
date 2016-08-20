@@ -12,6 +12,7 @@ import java.security.MessageDigest
 import com.andyqu.docker.deploy.history.DeployHistory
 
 class Tool {
+	def static final LOGGER = LoggerFactory.getLogger("Tool")
 	JsonSlurper slurper = new JsonSlurper()
     def  static generateMD5(String s) {
         MessageDigest digest = MessageDigest.getInstance("MD5")
@@ -29,6 +30,12 @@ class Tool {
             false
         }
     }
+	def Tool(){
+		extendSlf4j()
+		extendBufferedReader()
+		extendObject()
+		LOGGER.info "event_name=Tool_bean_created"
+	}
     def   extendSlf4j(){
         Logger.metaClass.trace={
             msgObj->
@@ -66,6 +73,10 @@ class Tool {
 		Object.metaClass.toMap = {
 				return slurper.parseText(new JsonBuilder(delegate).toString())
 		}
+		Object.metaClass.toString={
+			LOGGER.info "event_name=injected_toString_called"
+			return new JsonBuilder(delegate).toPrettyString()
+		}
 		this
 	}
 }
@@ -73,6 +84,11 @@ class Tool {
 
 
 class DockerTool {
+	def static final LOGGER = LoggerFactory.getLogger("DockerTool")
+	def DockerTool(){
+		extendDockerClientImpl()
+		LOGGER.info "event_name=DockerTool_bean_created"
+	}
     def   void extendDockerClientImpl(){
         /*
         DockerClientImpl在gesellix/docker-client的15年版本中，日志器名字是logger。
