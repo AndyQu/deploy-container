@@ -25,7 +25,8 @@ class ProjectMetaManager {
 	
 	def static ProjectMetaManager getInstance(){
 		if(_ins==null){
-			
+			LOGGER.error("event_name=ProjectMetaManager_not_init msg=should call initInstance(DeployContext context) first");
+			throw new Exception("event_name=ProjectMetaManager_not_init msg=should call initInstance(DeployContext context) first");
 		}
 		_ins
 	}
