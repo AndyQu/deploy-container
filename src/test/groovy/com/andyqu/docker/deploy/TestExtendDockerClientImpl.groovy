@@ -18,8 +18,9 @@ class TestExtendDockerClientImpl {
     def containerId
     @BeforeTest
     def void setUp(){
-        Tool.extendSlf4j()
-        DockerTool.extendDockerClientImpl()
+        new Tool().extendSlf4j()
+        new DockerTool().extendDockerClientImpl()
+		
         dClient = new DockerClientImpl()
         def containerConfig = ["Cmd"   : [],
                                "Image" : "busybox:latest",

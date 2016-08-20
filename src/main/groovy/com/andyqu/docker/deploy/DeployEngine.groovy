@@ -26,10 +26,6 @@ import com.andyqu.docker.deploy.model.ProjectMeta
 
 
 class DeployEngine {
-    static {
-        Tool.extendSlf4j()
-        DockerTool.extendDockerClientImpl()
-    }
     def static logger = LoggerFactory.getLogger("DeployEngine")
     def DockerClient dClient
     def String host

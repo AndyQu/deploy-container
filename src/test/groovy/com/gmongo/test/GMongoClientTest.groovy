@@ -36,7 +36,7 @@ class GMongoClientTest {
 	
 	@BeforeTest
 	def void setup(){
-		Tool.extendObject()
+		new Tool().extendObject()
 		//notice:这里的"admin"指的是用于获取用户数据的database，不是用户拥有权限的database
 		credentials = MongoCredential.createMongoCRCredential(username,  "admin",  password as char[])
 //		client = new GMongoClient(new ServerAddress( "${host}:${port}"), [credentials])

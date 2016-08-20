@@ -10,6 +10,8 @@ import com.andyqu.docker.deploy.DeployEngine
 import com.andyqu.docker.deploy.ProjectMetaManager
 import com.andyqu.docker.deploy.model.ProjectMeta;
 import com.andyqu.docker.deploy.DeployContext
+import com.andyqu.docker.deploy.Tool
+import com.andyqu.docker.deploy.DockerTool
 
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
@@ -35,6 +37,9 @@ class TopControl {
 			println("请指定要部署的工程名称. 目前支持可部署的工程包括:${validProjectNames}")
 			System.exit(1)
 		}
+		new Tool().extendSlf4j().extendObject().extendBufferedReader()
+		new DockerTool().extendDockerClientImpl()
+		
 		def targetProjectNames = args[1].split ";"
 
 		/*

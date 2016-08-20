@@ -7,9 +7,6 @@ import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 
 class CmdUserInput {
-	static{
-		Tool.extendBufferedReader()
-	}
 	def nonInteractMode=false
 	def String work(Collection<String> targetProjectNames, envConfFileName){
 		println "============命令行输入模块================"
