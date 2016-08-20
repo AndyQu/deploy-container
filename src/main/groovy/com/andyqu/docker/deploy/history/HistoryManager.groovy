@@ -26,18 +26,20 @@ class HistoryManager {
 	
 	static HistoryManager getInstance(){
 		if(_ins==null){
-			Tool.extendObject()
 			_ins=new HistoryManager()
+			_ins.setMongoConfig()
 		}
 		return _ins
 	}
 	
-	HistoryManager(){
-		def jsonSlurper = new JsonSlurper()
-		this.mongoConfig = jsonSlurper.parse(HistoryManager.class.getResource('/mongodb.json'))
+	def setMongoConfig(configJson){
+		this.mongoConfig=new JsonSlurper().parse(HistoryManager.class.getResource(configJson))
 		credentials = MongoCredential.createMongoCRCredential(mongoConfig.username, authenticationDatabase, mongoConfig.password as char[])
 		client = new GMongoClient(new ServerAddress(mongoConfig.serverAddress, mongoConfig.serverPort), [credentials])
-		db = client.getDB(mongoConfig.database)	
+		db = client.getDB(mongoConfig.database)
+	}
+	
+	HistoryManager(){
 	}
 	def save(DeployHistory history){
 		def projectNames=history.getProjectNames()
