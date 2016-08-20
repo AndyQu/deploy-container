@@ -10,6 +10,6 @@ class DeployContext {
 		hostConfig.workFolder
 	}
 	def setEnvConfigFile(String file){
-		hostConfig = new JsonSlurper().parse(new FileReader(new File(file)))
+		hostConfig = new JsonSlurper().parse(DeployContext.class.getResource(file))
 	}
 }
