@@ -27,7 +27,6 @@ class GMongoClientTest {
 	def username="unit_testor"
 	def password="123456"
 	def database="unit_test"
-	def host="10.4.242.144"
 	def port=27017
 	
 	def credentials
@@ -38,20 +37,25 @@ class GMongoClientTest {
 	def void setup(){
 		new Tool().extendObject()
 		//notice:这里的"admin"指的是用于获取用户数据的database，不是用户拥有权限的database
-		credentials = MongoCredential.createMongoCRCredential(username,  "admin",  password as char[])
-//		client = new GMongoClient(new ServerAddress( "${host}:${port}"), [credentials])
-//		credentials = MongoCredential.createScramSha1Credential(username, database, password as char[])
-		client = new GMongoClient(new ServerAddress( host,  port), [credentials])
+		//	def host="10.4.242.144" //meituan
+//		credentials = MongoCredential.createMongoCRCredential(username,  "admin",  password as char[])
+//		client = new GMongoClient(new ServerAddress( host,  port), [credentials])
+
+		def host="127.0.0.1"
+		credentials = MongoCredential.createScramSha1Credential(username, database, password as char[])
+		client = new GMongoClient(new ServerAddress( "${host}:${port}"), [credentials])
+//		client = new GMongoClient(new ServerAddress( host,  port), [credentials])
 
 		db=client.getDB(database)
 		logger.info("event_name=setup_mongodb_connection client={}", ReflectionToStringBuilder.toString(client, ToStringStyle.MULTI_LINE_STYLE))
+		
+		prepareData()
 	}
 	
-	@Test
-	def void dog(){
+	def void prepareData(){
 		assert db.webhivesql instanceof com.mongodb.DBCollection
 		assert db['webhivesql'] instanceof com.mongodb.DBCollection
-		def a= BeanUtils.describe(["web","hehe"])
+//		def a= BeanUtils.describe(["web","hehe"])
 		def time=System.currentTimeSeconds()
 		[
 			new DeployHistory(
@@ -72,11 +76,15 @@ class GMongoClientTest {
 				hostName:"andyqu-dev",
 				hostIp:"172.26.19.70"
 			),
-		].each{ 
+		].each{
 			def m = it.toMap()
 			logger.info("event_name=insert item={}", m)
 			db.webhivesql << m
 		}
+	}
+	
+	@Test
+	def void dog(){
 		db['webhivesql'].find().each {
 			logger.info("event_name=show_record record={}",new JsonBuilder(it).toPrettyString())
 		}
@@ -101,7 +109,19 @@ class GMongoClientTest {
 		logger.info("找出最新的部署")
 		DBCursor cursor = db.webhivesql.find(condition ).sort(startTimeStamp:-1)
 		if(cursor.hasNext()){
-			logger.info("event_name=show_latest_deployment record={}",new JsonBuilder(cursor.next()).toPrettyString())
+			logger.info "event_name=show_latest_deployment record={}",cursor.next()
+		}else{
+			logger.info("event_name=没有任何部署")
+		}
+	}
+	
+	@Test
+	def void cat(){
+		DBCursor cursor = db.webhivesql.find( ).sort(startTimeStamp:-1)
+		if(cursor.hasNext()){
+			DBObject item=cursor.next()
+			logger.info "event_name=show_DBObject_type class={} toString={}",item.getClass(), item.toString()
+			logger.info "event_name=show_latest_deployment record={}", item as DeployHistory
 		}else{
 			logger.info("event_name=没有任何部署")
 		}
