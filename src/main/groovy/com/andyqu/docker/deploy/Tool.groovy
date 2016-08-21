@@ -10,6 +10,11 @@ import org.slf4j.LoggerFactory
 import java.security.MessageDigest
 
 import com.andyqu.docker.deploy.history.DeployHistory
+import com.mongodb.BasicDBObject;
+
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 
 class Tool {
 	def static final LOGGER = LoggerFactory.getLogger("Tool")
@@ -75,6 +80,11 @@ class Tool {
 		}
 		Object.metaClass.toString={
 			LOGGER.info "event_name=injected_toString_called"
+			return new JsonBuilder(delegate).toPrettyString()
+		}
+		BasicDBObject.metaClass.toString={
+			LOGGER.info "event_name=injected_BasicDBObjecttoString_called"
+//			return ReflectionToStringBuilder.toString(delegate, ToStringStyle.MULTI_LINE_STYLE);
 			return new JsonBuilder(delegate).toPrettyString()
 		}
 		this
