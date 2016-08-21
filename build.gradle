@@ -21,7 +21,7 @@ dependencies {
     compile 'de.gesellix:docker-client:+'
 	compile 'ch.qos.logback:logback-classic:1.1.7'
 	compile 'ch.qos.logback:logback-core:1.1.7'
-	compile 'org.slf4j:slf4j-api:1.7.13'
+	compile 'org.slf4j:slf4j-api'
 	//加入groovy-all，使得classpath中的lib包含运行groovy main class所需要的所有依赖包，无需依赖安装在Host主机上的Groovy
 	compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.4'
 
