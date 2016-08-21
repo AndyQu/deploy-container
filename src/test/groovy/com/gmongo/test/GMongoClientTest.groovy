@@ -121,7 +121,7 @@ class GMongoClientTest {
 		if(cursor.hasNext()){
 			DBObject item=cursor.next()
 			logger.info "event_name=show_DBObject_type class={} toString={}",item.getClass(), item.toString()
-			logger.info "event_name=show_latest_deployment record={}", item as DeployHistory
+			logger.info "event_name=show_latest_deployment record={}", item
 		}else{
 			logger.info("event_name=没有任何部署")
 		}
