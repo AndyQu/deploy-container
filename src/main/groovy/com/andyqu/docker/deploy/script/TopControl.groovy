@@ -58,7 +58,7 @@ class TopControl {
 		def confFilePath = new CmdUserInput().work(targetProjectNames as List,"${context.getWorkFolder()}/${envConfFileName}")
 
 		//合并：环境配置
-		def json = objsToJson(jsonSlurper.parse(new File(confFilePath)), context.hostConfig)
+		def json = Tool.objsToJson(jsonSlurper.parse(new File(confFilePath)), context.hostConfig)
 		println("部署配置:${json}")
 		/*
 		 * 开始部署
@@ -76,7 +76,5 @@ class TopControl {
 		engine.deploy(context.config.ownerName, context.config.projects as List<ProjectMeta>, context.config.imgName, context.config)
 	}
 	
-	def static objsToJson(objA, objB){
-		new JsonBuilder(objA+objB).toPrettyString()
-	}
+	
 }

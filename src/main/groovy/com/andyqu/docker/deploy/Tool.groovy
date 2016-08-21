@@ -35,6 +35,11 @@ class Tool {
             false
         }
     }
+	
+	def static objsToJson(objA, objB){
+		new JsonBuilder(objA+objB).toPrettyString()
+	}
+	
 	def Tool(){
 		extendSlf4j()
 		extendBufferedReader()

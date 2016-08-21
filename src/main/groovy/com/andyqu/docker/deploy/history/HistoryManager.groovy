@@ -74,8 +74,8 @@ class HistoryManager {
 	 * @param projectName
 	 * @return 所有的部署历史
 	 */
-	def fetchHistories(String projectName){
-		def List histories=[]
+	def List<DBObject> fetchHistories(String projectName){
+		List<DBObject> histories=[]
 		try{
 			LOGGER.info("event_name=fetching_histories projectName={}", projectName)
 			//降序
