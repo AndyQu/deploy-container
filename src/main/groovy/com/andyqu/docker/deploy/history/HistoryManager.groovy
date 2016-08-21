@@ -25,6 +25,8 @@ class HistoryManager {
 	GMongoClient client
 	DB db
 	
+	
+	
 	static HistoryManager getInstance(){
 		if(_ins==null){
 			_ins=new HistoryManager()
@@ -73,14 +75,14 @@ class HistoryManager {
 	 * @return 所有的部署历史
 	 */
 	def fetchHistories(String projectName){
-		def histories=[]
+		def List histories=[]
 		try{
 			LOGGER.info("event_name=fetching_histories projectName={}", projectName)
 			//降序
-			db.webhivesql.find().sort(startTimeStamp:-1).each {
+			db."${projectName}".find().sort(startTimeStamp:-1).each {
 				//					LOGGER.info("event_name=show_history history={}",new JsonBuilder(it).toPrettyString())
-				LOGGER.info "event_name=show_history history={}",it.toString()
-				histories.add it
+				LOGGER.info "event_name=show_history key={} history={}",projectName, it.toString()
+				histories.add(it)
 			}
 			histories
 		}catch(MongoTimeoutException e){
