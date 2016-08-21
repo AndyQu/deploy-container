@@ -23,7 +23,7 @@ class DeployHistory {
 		this.startTime=new Date(startTimeStamp*1000).getDateTimeString()
 	}
 	public void setStartTimeStamp(long startTimeStamp) {
-		setStartTimeStamp(startTimeStamp.intValue())
+		setStartTimeStamp(startTimeStamp/1000.intValue())
 	}
 
 	public void setEndTimeStamp(int endTimeStamp) {
@@ -32,6 +32,6 @@ class DeployHistory {
 	}
 	
 	public void setEndTimeStamp(long endTimeStamp) {
-		setEndTimeStamp(endTimeStamp.intValue())
+		setEndTimeStamp(endTimeStamp/1000.intValue())
 	}
 }
