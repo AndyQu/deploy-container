@@ -66,3 +66,12 @@ run {
 task writeClasspath << {
 	new File("classpath.txt").text = configurations.runtime.asPath
 }
+
+eclipse {
+	classpath {
+	  //default settings for downloading sources and Javadoc:
+	  downloadSources = true
+	  downloadJavadoc = true
+	}
+  }
+  
