@@ -9,6 +9,7 @@ import com.mongodb.DBObject;
 import com.mongodb.ServerAddress
 import com.mongodb.MongoCredential
 import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper
 
 import org.testng.annotations.BeforeTest
 import org.testng.annotations.Test
@@ -22,6 +23,7 @@ import org.apache.commons.beanutils.BeanUtils
 
 class GMongoClientTest {
 	def static final Logger logger = LoggerFactory.getLogger(GMongoClientTest)
+	def static final JsonSlurper slurper=new JsonSlurper()
 	
 	//使用美团办公云的mongodb。如果不能直接连，则先用anyconnect连vpn
 	def username="unit_testor"
@@ -122,6 +124,11 @@ class GMongoClientTest {
 			DBObject item=cursor.next()
 			logger.info "event_name=show_DBObject_type class={} toString={}",item.getClass(), item.toString()
 			logger.info "event_name=show_latest_deployment record={}", item
+			def Map jresult = slurper.	parseText( new JsonBuilder(item).toString())
+//			DeployHistory history=jresult as DeployHistory
+			jresult.remove("_id")
+			DeployHistory history = new DeployHistory(jresult)
+			println(history.toString())
 		}else{
 			logger.info("event_name=没有任何部署")
 		}
