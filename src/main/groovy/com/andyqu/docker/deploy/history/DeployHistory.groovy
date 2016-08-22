@@ -1,4 +1,5 @@
 package com.andyqu.docker.deploy.history
+import groovy.transform.ToString
 
 class DeployHistory {
 	def projectNames=[];
@@ -18,20 +19,36 @@ class DeployHistory {
 	
 	boolean status
 	
+	/**
+	 * 
+	 * @param startTimeStamp 单位：秒
+	 */
 	public void setStartTimeStamp(int startTimeStamp) {
 		this.startTimeStamp = startTimeStamp;
 		this.startTime=new Date(startTimeStamp*1000).getDateTimeString()
 	}
+	/**
+	 *
+	 * @param startTimeStamp 单位：秒
+	 */
 	public void setStartTimeStamp(long startTimeStamp) {
-		setStartTimeStamp(startTimeStamp/1000.intValue())
+		setStartTimeStamp(startTimeStamp.intValue())
 	}
 
+	/**
+	 *
+	 * @param startTimeStamp 单位：秒
+	 */
 	public void setEndTimeStamp(int endTimeStamp) {
 		this.endTimeStamp = endTimeStamp;
 		this.endTime=new Date(endTimeStamp*1000).getDateTimeString()
 	}
 	
+	/**
+	 *
+	 * @param startTimeStamp 单位：秒
+	 */
 	public void setEndTimeStamp(long endTimeStamp) {
-		setEndTimeStamp(endTimeStamp/1000.intValue())
+		setEndTimeStamp(endTimeStamp.intValue())
 	}
 }
