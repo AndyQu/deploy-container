@@ -13,8 +13,6 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 class ProjectMetaManager {
 	def static final LOGGER = LoggerFactory.getLogger("DeployEngine")
 	
-	def static ProjectMetaManager _ins=null
-	
 	def pFolder
 	def metasFolder
 	def nameMetaMap=[:]
@@ -24,24 +22,9 @@ class ProjectMetaManager {
 //	def branch="testWindows"
 //	def branch="testI"
 	
-	def static void initInstance(DeployContext context){
-		if(_ins==null){
-			_ins=new ProjectMetaManager();
-			_ins.setContext(context)
-		}
-	}		
-	
-	def static ProjectMetaManager getInstance(){
-		if(_ins==null){
-			LOGGER.error("event_name=ProjectMetaManager_not_init msg=should call initInstance(DeployContext context) first");
-			throw new Exception("event_name=ProjectMetaManager_not_init msg=should call initInstance(DeployContext context) first");
-		}
-		_ins
-	}
-	
 	ProjectMetaManager(){
 	}
-	def setContext(DeployContext context){
+	def setContext(GlobalContext context){
 		this.context=context
 		pFolder=context.getWorkFolder()
 		metasFolder="${pFolder}/deploy_sys_project_meta/"
@@ -65,9 +48,6 @@ class ProjectMetaManager {
 		cloneCmd.setBranch("master")
 		LOGGER.info "event_name=checkout_master result={}",cloneCmd.call()
 		
-//		LOGGER.info "git clone https://github.com/AndyQu/deploy_sys_project_meta.git".execute(null, new File(pFolder)).text
-//		LOGGER.info "DO: git checkout -b ${branch} --track origin/${branch}"
-//		LOGGER.info "git checkout -b ${branch} --track origin/${branch}".execute(null, new File(metasFolder)).text
 		_parse()
 	}
 	
@@ -81,7 +61,9 @@ class ProjectMetaManager {
 					LOGGER.warn "文件 ${projectFolder.absolutePath}/deploy.sh 不存在"
 				}else{
 					def metaJson = jsonSlurper.parse(new FileReader("${projectFolder.absolutePath}/meta.json"))
-					nameMetaMap[metaJson.projectName.toLowerCase()]=metaJson
+//					nameMetaMap[metaJson.projectName.toLowerCase()]=new ProjectMeta(metaJson)
+					nameMetaMap[metaJson.projectName.toLowerCase()]=metaJson as ProjectMeta
+					
 					nameBashMap[metaJson.projectName.toLowerCase()]="${projectFolder.absolutePath}/deploy.sh"
 					LOGGER.info "读取到Project Meta信息：${metaJson.projectName}"
 				}

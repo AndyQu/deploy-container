@@ -29,6 +29,8 @@ class DeployEngine {
     def static logger = LoggerFactory.getLogger("DeployEngine")
     def DockerClient dClient
     def String host
+	def ProjectMetaManager projectMetaManager
+	def HistoryManager historyManager
 
     def DeployEngine(String dockerHost, int port) {
         //'http://172.27.2.94:4243'
@@ -78,7 +80,7 @@ git submodule update --init --recursive
         /**
          * 个性化部署脚本
          */
-		new File(ProjectMetaManager.getInstance().getProjectBashFile(pMeta.projectName)).withReader {
+		new File(projectMetaManager.getProjectBashFile(pMeta.projectName)).withReader {
 			deployFile << it
 		}
 		
@@ -230,7 +232,7 @@ git submodule update --init --recursive
         }
 		history.setEndTimeStamp(System.currentTimeSeconds())
 		history.setStatus(true)
-		HistoryManager.getInstance().save(history)
+		historyManager.getInstance().save(history)
     }
 
     /**

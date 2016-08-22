@@ -7,6 +7,7 @@ import java.nio.file.Files
 
 import com.andyqu.docker.deploy.CmdUserInput
 import com.andyqu.docker.deploy.DeployEngine
+import com.andyqu.docker.deploy.GlobalContext
 import com.andyqu.docker.deploy.ProjectMetaManager
 import com.andyqu.docker.deploy.model.ProjectMeta;
 import com.andyqu.docker.deploy.DeployContext
@@ -23,12 +24,13 @@ import java.lang.management.RuntimeMXBean
 class TopControl {
 	static void main(String[] args){
 		def envConfFileName=args[0]
-		DeployContext context = new DeployContext()
+		GlobalContext gContext=new GlobalContext()
+		gContext.setEnvConfigFile(envConfFileName)
+		
 		
 		//建立部署的Context
 		def jsonSlurper = new JsonSlurper()
-		context.hostConfig = jsonSlurper.parse(new FileReader(new File(envConfFileName)))
-		ProjectMetaManager.initInstance(context)
+		ProjectMetaManager.initInstance(gContext)
 
 		//是否指定了工程名称
 		def validProjectNames = ProjectMetaManager.getInstance().getAllProjectNames()
@@ -55,6 +57,7 @@ class TopControl {
 		/*
 		 * 读取用户输入，产生Conf文件
 		 */
+		DeployContext context = new DeployContext()
 		def confFilePath = new CmdUserInput().work(targetProjectNames as List,"${context.getWorkFolder()}/${envConfFileName}")
 
 		//合并：环境配置

@@ -18,7 +18,6 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 class Tool {
 	def static final LOGGER = LoggerFactory.getLogger("Tool")
-	JsonSlurper slurper = new JsonSlurper()
     def  static generateMD5(String s) {
         MessageDigest digest = MessageDigest.getInstance("MD5")
         digest.update(s.bytes);
@@ -37,7 +36,7 @@ class Tool {
     }
 	
 	def static objsToJson(objA, objB){
-		new JsonBuilder(objA+objB).toPrettyString()
+		new JsonSlurper().parseText(new JsonBuilder(objA+objB).toPrettyString())
 	}
 	
 	def Tool(){

@@ -3,6 +3,7 @@ package com.andyqu.docker.deploy.model
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 
+@ToString
 class ProjectMeta {
     def String projectName
     def String gitRepoUri
