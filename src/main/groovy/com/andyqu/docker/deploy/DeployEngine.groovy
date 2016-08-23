@@ -109,7 +109,13 @@ git submodule update --init --recursive
 		logger.info("\n====================部署项目${pMeta.projectName}-[结束]=======================")
     }
 
-    def deploy(String ownerName, List<ProjectMeta> pMetaList, String imgName, contextConfig) {
+    def deploy(String dockerName, String ownerName, List<ProjectMeta> pMetaList, String imgName, contextConfig) {
+		assert ownerName!=null
+		assert pMetaList!=null
+		assert imgName!=null
+		assert contextConfig!=null
+		
+		
 		DeployHistory history=new DeployHistory(
 			contextConfig:contextConfig, 
 			startTimeStamp:System.currentTimeSeconds(),
@@ -122,7 +128,7 @@ git submodule update --init --recursive
          * 根据分支名称,产生md5,与ownerName一起作为docker的名称
          *
          * */
-        String dockerName = generateContainerName(ownerName,pMetaList) 
+        
 		history.setContainerName(dockerName)
 		
         contextFolderPath = "${contextConfig.workFolder}/${dockerName}/"
@@ -195,24 +201,28 @@ git submodule update --init --recursive
 		
 		
 		logger.info("\n====================创建并启动container-[开始]=======================")
-        def response = dClient.createContainer(containerConfig, [name: dockerName])
-		def containerId = response.content.Id
+        def createResponse = dClient.createContainer(containerConfig, [name: dockerName])
+		def containerId = createResponse.content.Id
 		history.setContainerId(containerId)
-        if (response.status.success) {
+        if (createResponse.status.success) {
 			logger.info "event_name=创建container成功 container_id=${containerId}"
-            response = dClient.startContainer(containerId)
-			if(response.status.success){
+            def startResponse = dClient.startContainer(containerId)
+			if(startResponse.status.success){
 				logger.info("event_name=启动container成功 container_id=${containerId}")
 			}else{
-				logger.error("event_name=启动container失败 response=${response}")
-				System.exit(1)
+				logger.error("event_name=启动container失败 response=${startResponse}")
+				history.setStatus(false)
+				history.setEndTimeStamp(System.currentTimeSeconds())
+				historyManager.save(history)
+				throw new Exception("event_name=启动container失败 key=${dockerName} response=${startResponse}")
 			}
         } else {
 			history.setStatus(false)
 			history.setEndTimeStamp(System.currentTimeSeconds())
+			historyManager.save(history)
 			
-            logger.error("event_name=创建container失败 docker_name=${dockerName} response=${response}")
-            throw new Exception("创建container失败:${dockerName}.")
+            logger.error("event_name=创建container失败 docker_name=${dockerName} response=${createResponse}")
+            throw new Exception("event_name=创建container失败 key=${dockerName} response=${createResponse}")
         }
 		logger.info("\n====================创建并启动container-[结束]=======================\n")
 
@@ -232,7 +242,7 @@ git submodule update --init --recursive
         }
 		history.setEndTimeStamp(System.currentTimeSeconds())
 		history.setStatus(true)
-		historyManager.getInstance().save(history)
+		historyManager.save(history)
     }
 
     /**
@@ -372,14 +382,14 @@ git submodule update --init --recursive
             ])
         }*/
         if (pMetaList.find { pMeta -> pMeta.needMountGradleLib }) {
-            mounts.add(
-                    [
-                            "Source"     : "${jsonData.userFolder}/.gradle/",
+			def gradleLibConfig=[
+                            "Source"     : "${jsonData.gradleLibFolder}/",
                             "Destination": "/root/.gradle/",
                             "RW"         : true
                     ]
-            )
+            mounts.add(gradleLibConfig)
         }
+		
 		
 		/*
 		 * Notice：Project的git repo地址必须要配置为走Http方式。如果是走ssh方式，则Host主机必须加ssh key，且这里的挂载点不能够去掉。
@@ -416,39 +426,13 @@ git submodule update --init --recursive
         subFolders.each {
             path ->
                 def subpath = "${contextDir}/" + path.split("/").last()
-				logger.info(new File(subpath).deleteDir())
-				logger.info("event_name=删除文件夹 folder=${subpath}")
-                logger.info(new File(subpath).mkdirs())
-				logger.info("event_name=创建子文件夹 folder=${subpath}")
+				logger.info("event_name=删除子文件夹 folder=${subpath} result={}",new File(subpath).deleteDir())
+				logger.info("event_name=创建子文件夹 folder=${subpath} result={}",new File(subpath).mkdirs())
         }
 		logger.info "\n============================创建Context文件夹-[结束]===========================\n"
     }
 	
-	def static generateContainerName(ownerName,pMetaList){
-		/*
-		TimeZone.setDefault(TimeZone.getTimeZone('UTC'))
-		def now = new Date()
-		now.format("yyyyMMdd-HH:mm:ss.SSS")
-		*/
-		
-		"${ownerName}-" + pMetaList.collect(){
-				pMeta->"${pMeta.projectName}_${pMeta.gitbranchName}"
-			}.join("-")
-		
-		/*
-		"${ownerName}-" + Tool.generateMD5(
-			pMetaList.collect(){
-				pMeta->pMeta.projectName
-			}.join("-")
-			+
-			"_"
-			+
-			pMetaList.collect {
-				pMeta ->pMeta.gitbranchName
-			}.join("-")
-		)
-		*/
-	}
+	
 	
 	def ch.qos.logback.classic.Logger configureLogger(String logFileFolder){
 		//https://github.com/tony19/logback-android/wiki/Appender-Notes#configuration-in-code

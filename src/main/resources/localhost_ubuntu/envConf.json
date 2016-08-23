@@ -6,5 +6,6 @@
         "port":2375
     },
     "userFolder":"/root",
-    "workFolder":"/tmp/docker-deploy"
+    "workFolder":"/tmp/docker-deploy",
+    "gradleLibFolder":"/root/.dock_gradle"
 }
