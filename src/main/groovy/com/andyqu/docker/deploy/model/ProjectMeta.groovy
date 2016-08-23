@@ -3,14 +3,23 @@ package com.andyqu.docker.deploy.model
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 
-@ToString
+@ToString(includeNames=true, includeFields=true)
 class ProjectMeta {
     def String projectName
     def String gitRepoUri
     def String gitbranchName
 
     def List<PortMeta> portList
-    def Boolean needJavaDebugPort
+    public void setPortList( pList) {
+		this.portList = []
+		pList.each {
+			if(it instanceof PortMeta)
+				this.portList.add(it)
+			else
+				this.portList.add(new PortMeta(it))
+		}
+	}
+	def Boolean needJavaDebugPort
 
     def String logFolder
     def Boolean needMountNodeLib =false
@@ -19,7 +28,7 @@ class ProjectMeta {
     def String deployScriptFile
 }
 
-@ToString
+@ToString(includeNames=true, includeFields=true)
 @EqualsAndHashCode(excludes=["Port"])
 class PortMeta {
     def int port

@@ -61,8 +61,8 @@ class ProjectMetaManager {
 					LOGGER.warn "文件 ${projectFolder.absolutePath}/deploy.sh 不存在"
 				}else{
 					def metaJson = jsonSlurper.parse(new FileReader("${projectFolder.absolutePath}/meta.json"))
-//					nameMetaMap[metaJson.projectName.toLowerCase()]=new ProjectMeta(metaJson)
-					nameMetaMap[metaJson.projectName.toLowerCase()]=metaJson as ProjectMeta
+					nameMetaMap[metaJson.projectName.toLowerCase()]=new ProjectMeta(metaJson)
+//					nameMetaMap[metaJson.projectName.toLowerCase()]=metaJson as ProjectMeta
 					
 					nameBashMap[metaJson.projectName.toLowerCase()]="${projectFolder.absolutePath}/deploy.sh"
 					LOGGER.info "读取到Project Meta信息：${metaJson.projectName}"
