@@ -39,13 +39,39 @@ class Tool {
 		new JsonSlurper().parseText(new JsonBuilder(objA+objB).toPrettyString())
 	}
 	
+	def static generateContainerName(ownerName,pMetaList){
+		/*
+		TimeZone.setDefault(TimeZone.getTimeZone('UTC'))
+		def now = new Date()
+		now.format("yyyyMMdd-HH:mm:ss.SSS")
+		*/
+		
+		"${ownerName}-" + pMetaList.collect(){
+				pMeta->"${pMeta.projectName}_${pMeta.gitbranchName}"
+			}.join("-")
+		
+		/*
+		"${ownerName}-" + Tool.generateMD5(
+			pMetaList.collect(){
+				pMeta->pMeta.projectName
+			}.join("-")
+			+
+			"_"
+			+
+			pMetaList.collect {
+				pMeta ->pMeta.gitbranchName
+			}.join("-")
+		)
+		*/
+	}
+	
 	def Tool(){
 		extendSlf4j()
 		extendBufferedReader()
 		extendObject()
 		LOGGER.info "event_name=Tool_bean_created"
 	}
-    def   extendSlf4j(){
+    def   Tool extendSlf4j(){
         Logger.metaClass.trace={
             msgObj->
                 trace(new JsonBuilder(msgObj).toPrettyString())
@@ -69,7 +95,7 @@ class Tool {
 		this
     }
 
-    def   extendBufferedReader(){
+    def   Tool extendBufferedReader(){
         BufferedReader.metaClass.readLine={
             str->
                 print str
@@ -78,9 +104,9 @@ class Tool {
 		this
     }
 	
-	def   extendObject(){
+	def   Tool extendObject(){
 		Object.metaClass.toMap = {
-				return slurper.parseText(new JsonBuilder(delegate).toString())
+				return new JsonSlurper().parseText(new JsonBuilder(delegate).toString())
 		}
 		Object.metaClass.toString={
 			LOGGER.info "event_name=injected_toString_called"
