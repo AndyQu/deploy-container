@@ -5,6 +5,7 @@ import org.testng.annotations.Test
 import com.andyqu.docker.deploy.history.DeployHistory
 import com.andyqu.docker.deploy.history.HistoryManager
 import com.mongodb.DBCollection
+import groovy.json.JsonSlurper
 
 import org.slf4j.Logger;
 import org.testng.annotations.AfterTest
@@ -15,11 +16,13 @@ import org.slf4j.LoggerFactory
 class TestHistoryManager {
 	def static final Logger logger = LoggerFactory.getLogger(TestHistoryManager)
 	
-	HistoryManager manager 
+	HistoryManager manager
+	Tool tool = new Tool()
 	
 	@BeforeTest
 	def void setup(){
-		manager = HistoryManager.getInstance()
+		manager = new HistoryManager()
+		manager.setMongoConfig("/mongodb.json")
 	}
 	
 	@Test
