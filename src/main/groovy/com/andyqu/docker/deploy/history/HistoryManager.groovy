@@ -17,7 +17,6 @@ import groovy.json.JsonSlurper
 
 class HistoryManager {
 	static final Logger LOGGER = LoggerFactory.getLogger("DeployEngine")
-	static HistoryManager _ins = null
 	static String authenticationDatabase="admin"
 	
 	def mongoConfig
@@ -25,18 +24,8 @@ class HistoryManager {
 	GMongoClient client
 	DB db
 	
-	
-	
-	static HistoryManager getInstance(){
-		if(_ins==null){
-			_ins=new HistoryManager()
-			_ins.setMongoConfig()
-		}
-		return _ins
-	}
-	
-	def setMongoConfig(configJson){
-		this.mongoConfig=new JsonSlurper().parse(HistoryManager.class.getResource(configJson))
+	def setMongoConfig(String configJsonFile){
+		this.mongoConfig=new JsonSlurper().parse(HistoryManager.class.getResource(configJsonFile))
 		credentials = MongoCredential.createMongoCRCredential(mongoConfig.username, authenticationDatabase, mongoConfig.password as char[])
 		client = new GMongoClient(new ServerAddress(mongoConfig.serverAddress, mongoConfig.serverPort), [credentials])
 		db = client.getDB(mongoConfig.database)
