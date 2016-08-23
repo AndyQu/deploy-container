@@ -34,8 +34,8 @@ class HistoryManager {
 	HistoryManager(){
 	}
 	def save(DeployHistory history){
-		def projectNames=history.getProjectNames()
-		db[getRealName(projectNames)].insert(history.toMap())
+		def tName=tableName(history.getProjectNames().join("_"))
+		db[tName].insert(history.toMap())
 		LOGGER.info("event_name=save_deployhistory history_item={}", new JsonBuilder(history).toPrettyString())
 	}
 	
@@ -45,9 +45,10 @@ class HistoryManager {
 	 * @param deployName 一次部署的名称，目前和container名称相同
 	 * @return
 	 */
-	def DBObject fetchLatestHistory(def projectNames, String deployName){
-		DBCursor cursor = db[getRealName(projectNames)].find([containerName:deployName])
-		LOGGER.info("event_name=fetchLatestHistory projectNames={} deployName={}", projectNames, deployName)
+	def DBObject fetchLatestHistory(def projectName, String deployName){
+		def tableName=tableName(projectName)
+		DBCursor cursor = db[tableName].find([containerName:deployName])
+		LOGGER.info("event_name=fetchLatestHistory projectNames={} deployName={}", tableName, deployName)
 		if(cursor.hasNext()){
 			DBObject result = cursor.next()
 			LOGGER.info("fetched_history={}", result)
@@ -65,22 +66,23 @@ class HistoryManager {
 	 */
 	def List<DBObject> fetchHistories(String projectName){
 		List<DBObject> histories=[]
+		def tableName=tableName(projectName)
 		try{
-			LOGGER.info("event_name=fetching_histories projectName={}", projectName)
+			LOGGER.info("event_name=fetching_histories projectName={}", tableName)
 			//降序
-			db."${projectName}".find().sort(startTimeStamp:-1).each {
+			db."${tableName}".find().sort(startTimeStamp:-1).each {
 				//					LOGGER.info("event_name=show_history history={}",new JsonBuilder(it).toPrettyString())
-				LOGGER.info "event_name=show_history key={} history={}",projectName, it.toString()
+				LOGGER.info "event_name=show_history key={} history={}",tableName, it.toString()
 				histories.add(it)
 			}
 			histories
 		}catch(MongoTimeoutException e){
-			LOGGER.error "event_name=history_server_timeout projectName={} e={}", projectName, e
+			LOGGER.error "event_name=history_server_timeout projectName={} e={}", tableName, e
 			histories
 		}
 	}
 	
-	static String getRealName(projectNames){
-		projectNames.join('_')
+	static String tableName(String projectName){
+		projectName.toLowerCase()
 	}
 }
