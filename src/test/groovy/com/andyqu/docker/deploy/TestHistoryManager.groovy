@@ -23,16 +23,13 @@ class TestHistoryManager {
 	def void setup(){
 		manager = new HistoryManager()
 		manager.setMongoConfig("/mongodb.json")
-	}
-	
-	@Test
-	def void cat(){
+		
 		int time = System.currentTimeSeconds().intValue()
 		[
 			new DeployHistory(
 				startTimeStamp:time,
 				endTimeStamp:time+100,
-				projectNames:["srqserver","webhivesql"],
+				projectNames:["webhivesql"],
 				containerName:"annoy-master-webhivesql",
 				containerId:"e12eba6ee03b",
 				hostName:"andyqu-dev",
@@ -41,7 +38,7 @@ class TestHistoryManager {
 			new DeployHistory(
 				startTimeStamp:time+2000,
 				endTimeStamp:time+3000,
-				projectNames:["webhivesql","crm"],
+				projectNames:["crm"],
 				containerName:"andy-dev-webhivesql",
 				containerId:"e12eba6ee03b",
 				hostName:"andyqu-dev",
@@ -50,14 +47,23 @@ class TestHistoryManager {
 		].each {
 			manager.save(it)
 		}
-		manager.fetchLatestHistory(["webhivesql","crm"], "andy-dev-webhivesql")
+	}
+	
+	@Test
+	def void cat(){
+		manager.fetchHistories("crm")
+	}
+	
+	@Test
+	def void dog(){
+		manager.fetchHistories("crm",[containerId:"e12eba6ee03b"])
 	}
 	
 	@AfterTest
 	def void cleanup(){
 		[
-			'webhivesql_crm',
-			'srqserver_webhivesql'
+			'webhivesql',
+			'crm'
 		].each {
 		name->
 			manager.db[name].find().each {

@@ -40,37 +40,18 @@ class HistoryManager {
 	}
 	
 	/**
-	 * 
-	 * @param projectNames
-	 * @param deployName 一次部署的名称，目前和container名称相同
+	 * 条件查询
+	 * @param projectName
+	 * @param condition
 	 * @return
 	 */
-	def DBObject fetchLatestHistory(def projectName, String deployName){
-		def tableName=tableName(projectName)
-		DBCursor cursor = db[tableName].find([containerName:deployName])
-		LOGGER.info("event_name=fetchLatestHistory projectNames={} deployName={}", tableName, deployName)
-		if(cursor.hasNext()){
-			DBObject result = cursor.next()
-			LOGGER.info("fetched_history={}", result)
-			result
-		}else{
-			LOGGER.warn("no_history")
-			null
-		}
-	}
-	
-	/**
-	 * 
-	 * @param projectName
-	 * @return 所有的部署历史
-	 */
-	def List<DBObject> fetchHistories(String projectName){
+	def List<DBObject> fetchHistories(String projectName, condition=[:], sort=[startTimeStamp:-1],limit=java.lang.Integer.MAX_VALUE){
 		List<DBObject> histories=[]
 		def tableName=tableName(projectName)
 		try{
-			LOGGER.info("event_name=fetching_histories projectName={}", tableName)
+			LOGGER.info("event_name=fetching_histories projectName={} condition={}", tableName, condition)
 			//降序
-			db."${tableName}".find().sort(startTimeStamp:-1).each {
+			db."${tableName}".find(condition).limit(limit).sort(sort).each {
 				//					LOGGER.info("event_name=show_history history={}",new JsonBuilder(it).toPrettyString())
 				LOGGER.info "event_name=show_history key={} history={}",tableName, it.toString()
 				histories.add(it)
