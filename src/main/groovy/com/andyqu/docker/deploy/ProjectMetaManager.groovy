@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory
 
 import org.eclipse.jgit.api.CloneCommand
 import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.api.PullCommand;
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 
@@ -36,18 +37,22 @@ class ProjectMetaManager {
 		
 		def f = new File(metasFolder)
 		if(f.exists()){
-			f.deleteDir()
-			LOGGER.info "删除 ${f}"
+//			f.deleteDir()
+			LOGGER.info "已存在 ${f}. pull"
+			FileRepositoryBuilder builder = new FileRepositoryBuilder();
+			Repository repository = builder.setWorkTree(f).readEnvironment().build();
+			Git git = new Git(repository);
+			PullCommand pull = git.pull();
+			pull.call();
 		}else{
 			LOGGER.info "${f} 不存在. "
+			LOGGER.info "DO: git clone https://github.com/AndyQu/deploy_sys_project_meta.git"
+			CloneCommand cloneCmd=new CloneCommand()
+			cloneCmd.setURI("https://github.com/AndyQu/deploy_sys_project_meta.git")
+			cloneCmd.setDirectory(new File(metasFolder))
+			cloneCmd.setBranch("master")
+			LOGGER.info "event_name=checkout_master result={}",cloneCmd.call()
 		}
-		LOGGER.info "DO: git clone https://github.com/AndyQu/deploy_sys_project_meta.git"
-		CloneCommand cloneCmd=new CloneCommand()
-		cloneCmd.setURI("https://github.com/AndyQu/deploy_sys_project_meta.git")
-		cloneCmd.setDirectory(new File(metasFolder))
-		cloneCmd.setBranch("master")
-		LOGGER.info "event_name=checkout_master result={}",cloneCmd.call()
-		
 		_parse()
 	}
 	
