@@ -40,15 +40,13 @@ class Tool {
 	}
 	
 	def static generateContainerName(ownerName,pMetaList){
-		/*
-		TimeZone.setDefault(TimeZone.getTimeZone('UTC'))
+		TimeZone.setDefault(TimeZone.getTimeZone(TimeZone.GMT_ID))
 		def now = new Date()
-		now.format("yyyyMMdd-HH:mm:ss.SSS")
-		*/
+		now.format("yyyyMMdd_HH_mm_ss_SSS")
 		
 		"${ownerName}-" + pMetaList.collect(){
 				pMeta->"${pMeta.projectName}_${pMeta.gitbranchName}"
-			}.join("-")
+			}.join("-")+"-"+now.format("yyyyMMdd_HH_mm_ss_SSS")
 		
 		/*
 		"${ownerName}-" + Tool.generateMD5(
