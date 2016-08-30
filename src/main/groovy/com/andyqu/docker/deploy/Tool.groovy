@@ -9,6 +9,12 @@ import org.slf4j.LoggerFactory
 
 import java.security.MessageDigest
 
+import ch.qos.logback.classic.LoggerContext
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.rolling.RollingFileAppender
+import ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy
+import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy
 import com.andyqu.docker.deploy.history.DeployHistory
 import com.mongodb.BasicDBObject;
 
@@ -40,7 +46,7 @@ class Tool {
 	}
 	
 	def static generateContainerName(ownerName,pMetaList){
-		TimeZone.setDefault(TimeZone.getTimeZone(TimeZone.GMT_ID))
+		TimeZone.setDefault(TimeZone.getTimeZone(TimeZone.GMT_ID+"+8"))
 		def now = new Date()
 		now.format("yyyyMMdd_HH_mm_ss_SSS")
 		
@@ -116,6 +122,56 @@ class Tool {
 			return new JsonBuilder(delegate).toPrettyString()
 		}
 		this
+	}
+	
+	def static Logger configureLogger(String logFileFolder, String loggerName){
+		//https://github.com/tony19/logback-android/wiki/Appender-Notes#configuration-in-code
+//		logger.info "\n========================重新配置Logback-[开始]=================================="
+		LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+		/*
+		 * Notice: dont reset. reset() will discard all loggers/appenders, so root logger will not function any more
+		 */
+//		lc.reset()
+		
+		RollingFileAppender<ILoggingEvent> rollingFileAppender = new RollingFileAppender<ILoggingEvent>();
+		rollingFileAppender.setName("appenderForDeploy")
+		rollingFileAppender.setAppend(true);
+		rollingFileAppender.setContext(lc);
+		rollingFileAppender.setFile("${logFileFolder}/deploy.log");
+		
+		SizeAndTimeBasedRollingPolicy rollingPolicy = new SizeAndTimeBasedRollingPolicy()
+		rollingPolicy.setFileNamePattern("${logFileFolder}/deploy.%d{yyyy-MM-dd}.%i.log");
+		rollingPolicy.setMaxFileSize("300KB")
+		rollingPolicy.setMaxHistory(2)
+		rollingPolicy.setParent(rollingFileAppender)
+		rollingPolicy.setContext(lc)
+		rollingPolicy.start()
+		rollingFileAppender.setRollingPolicy(rollingPolicy)
+		
+		SizeBasedTriggeringPolicy triggerPolicy = new SizeBasedTriggeringPolicy()
+		triggerPolicy.setMaxFileSize("300KB")
+		triggerPolicy.setContext(lc)
+		triggerPolicy.start()
+		rollingFileAppender.setTriggeringPolicy(triggerPolicy)
+		
+		PatternLayoutEncoder encoder = new PatternLayoutEncoder();
+		encoder.setPattern("%d{HH:mm:ss.SSS} %-5level %logger{0} %class{0} %line - %msg%n");
+		encoder.setContext(lc);
+		encoder.start();
+		rollingFileAppender.setEncoder(encoder);
+		
+		rollingFileAppender.start();
+		
+//		ch.qos.logback.classic.Logger newLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("DeployEngine");
+		Logger newLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(loggerName);
+		newLogger.setAdditive(true)
+		newLogger.setLevel(ch.qos.logback.classic.Level.DEBUG)
+//		logger.setLevel(ch.qos.logback.classic.Level.INFO)
+		newLogger.addAppender(rollingFileAppender)
+		
+		ch.qos.logback.core.util.StatusPrinter.print(lc);
+		newLogger
+//		logger.info "\n========================重新配置Logback-[结束]==================================\n"
 	}
 }
 

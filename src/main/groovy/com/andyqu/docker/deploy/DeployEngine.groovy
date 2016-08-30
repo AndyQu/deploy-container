@@ -26,7 +26,7 @@ import com.andyqu.docker.deploy.model.ProjectMeta
 
 
 class DeployEngine {
-    def static logger = LoggerFactory.getLogger("DeployEngine")
+    def Logger  logger = null
     def DockerClient dClient
     def String host
 	def ProjectMetaManager projectMetaManager
@@ -130,9 +130,7 @@ git submodule update --init --recursive
          * */
         
 		history.setContainerName(dockerName)
-		
         contextFolderPath = "${contextConfig.workFolder}/${dockerName}/"
-		configureLogger(contextFolderPath)
 
         /**
          * 检查当前是否已经存在同名的docker实例
@@ -151,17 +149,17 @@ git submodule update --init --recursive
 			logger.info "event_name=不存在同名container name=${dockerName}"
 		}
 		
-        List<Object> configedPortList  = allocateNewPorts(pMetaList, dClient.queryAllContainerPorts())
+        List<Object> configedPortList  = allocateNewPorts(pMetaList, dClient.queryAllContainerPorts(), this.logger)
 
         /**
          * 需要挂载的目录:
          */
-        def (allMountPoints, nonLibMountPoints) = calcMountPoints(pMetaList, dockerName, contextFolderPath, contextConfig)
+        def (allMountPoints, nonLibMountPoints) = calcMountPoints(pMetaList, dockerName, contextFolderPath, contextConfig, this.logger)
         
         /**
          * 创建/docker-deploy目录
          * 在/docker-deploy目录下面创建属于本次部署的私有目录: /docker-deploy/${docker-name}*/
-        buildContextFolder(contextFolderPath, nonLibMountPoints)
+        buildContextFolder(contextFolderPath, nonLibMountPoints, this.logger)
 
         /**
          * 再创建docker container
@@ -246,23 +244,11 @@ git submodule update --init --recursive
     }
 
     /**
-     * 查询其绑定的端口
-     * @param dClient
-     * @param container
-     * @return
-     */
-    def static List<Object> queryExistingPorts(DockerClient dClient, container) {
-
-        logger.info("容器端口：${container.Ports}")
-        return container.Ports
-    }
-
-    /**
      * 搜集并分配所有需要被映射的端口,包括debug端口
      * @param pMetaList
      * @return
      */
-    def static List<Object> allocateNewPorts(List<ProjectMeta> pMetaList, List<Integer> allContainerPorts) {
+    def static List<Object> allocateNewPorts(List<ProjectMeta> pMetaList, List<Integer> allContainerPorts, Logger logger) {
         /**
          * 搜集所有需要被映射的端口
          */
@@ -350,7 +336,7 @@ git submodule update --init --recursive
      * @param pMetaList
      * @return
      */
-    def static calcMountPoints(List<ProjectMeta> pMetaList, dockerName, contextFolderPath, jsonData) {
+    def static calcMountPoints(List<ProjectMeta> pMetaList, dockerName, contextFolderPath, jsonData, Logger logger) {
         Set<String> containerInnerVolumnSet = pMetaList.inject(new HashSet<>()) {
             volumnSet, pMeta ->
                 if (pMeta.logFolder != null) {
@@ -373,14 +359,6 @@ git submodule update --init --recursive
                         "RW"         : true
                 ]
         }
-		// 暂时不挂在node目录
-        /*if (pMetaList.find { pMeta -> pMeta.needMountNodeLib }) {
-            mounts.add([
-                    "Source"     : "/home/sankuai/fe-paidui/node_modules/",
-                    "Destination": "/src/node_modules/",
-                    "RW"         : true
-            ])
-        }*/
         if (pMetaList.find { pMeta -> pMeta.needMountGradleLib }) {
 			def gradleLibConfig=[
                             "Source"     : "${jsonData.gradleLibFolder}/",
@@ -416,7 +394,7 @@ git submodule update --init --recursive
      * @param subFolders
      * @return
      */
-    def static buildContextFolder(contextDir, subFolders) {
+    def static buildContextFolder(contextDir, subFolders, Logger logger) {
         def contextFile = new File(contextDir)
 		logger.info "\n============================创建Context文件夹-[开始]==========================="
         
@@ -431,54 +409,4 @@ git submodule update --init --recursive
         }
 		logger.info "\n============================创建Context文件夹-[结束]===========================\n"
     }
-	
-	
-	
-	def ch.qos.logback.classic.Logger configureLogger(String logFileFolder){
-		//https://github.com/tony19/logback-android/wiki/Appender-Notes#configuration-in-code
-		logger.info "\n========================重新配置Logback-[开始]=================================="
-		LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-		/*
-		 * Notice: dont reset. reset() will discard all loggers/appenders, so root logger will not function any more
-		 */
-//		lc.reset()
-		
-		RollingFileAppender<ILoggingEvent> rollingFileAppender = new RollingFileAppender<ILoggingEvent>();
-		rollingFileAppender.setName("appenderForDeploy")
-		rollingFileAppender.setAppend(true);
-		rollingFileAppender.setContext(lc);
-		rollingFileAppender.setFile("${logFileFolder}/deploy.log");
-		
-		SizeAndTimeBasedRollingPolicy rollingPolicy = new SizeAndTimeBasedRollingPolicy()
-		rollingPolicy.setFileNamePattern("${logFileFolder}/deploy.%d{yyyy-MM-dd}.%i.log");
-		rollingPolicy.setMaxFileSize("300KB")
-		rollingPolicy.setMaxHistory(2)
-		rollingPolicy.setParent(rollingFileAppender)
-		rollingPolicy.setContext(lc)
-		rollingPolicy.start()
-		rollingFileAppender.setRollingPolicy(rollingPolicy)
-		
-		SizeBasedTriggeringPolicy triggerPolicy = new SizeBasedTriggeringPolicy()
-		triggerPolicy.setMaxFileSize("300KB")
-		triggerPolicy.setContext(lc)
-		triggerPolicy.start()
-		rollingFileAppender.setTriggeringPolicy(triggerPolicy)
-		
-		PatternLayoutEncoder encoder = new PatternLayoutEncoder();
-		encoder.setPattern("%d{HH:mm:ss.SSS} %-5level %logger{0} %class{0} %line - %msg%n");
-		encoder.setContext(lc);
-		encoder.start();
-		rollingFileAppender.setEncoder(encoder);
-		
-		rollingFileAppender.start();
-		
-		ch.qos.logback.classic.Logger newLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("DeployEngine");
-		newLogger.setAdditive(true)
-		newLogger.setLevel(ch.qos.logback.classic.Level.DEBUG)
-//		logger.setLevel(ch.qos.logback.classic.Level.INFO)
-		newLogger.addAppender(rollingFileAppender)
-		
-		StatusPrinter.print(lc);
-		logger.info "\n========================重新配置Logback-[结束]==================================\n"
-	}
 }
