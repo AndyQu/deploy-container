@@ -113,11 +113,9 @@ class Tool {
 				return new JsonSlurper().parseText(new JsonBuilder(delegate).toString())
 		}
 		Object.metaClass.toString={
-			LOGGER.info "event_name=injected_toString_called"
 			return new JsonBuilder(delegate).toPrettyString()
 		}
 		BasicDBObject.metaClass.toString={
-			LOGGER.info "event_name=injected_BasicDBObjecttoString_called"
 //			return ReflectionToStringBuilder.toString(delegate, ToStringStyle.MULTI_LINE_STYLE);
 			return new JsonBuilder(delegate).toPrettyString()
 		}

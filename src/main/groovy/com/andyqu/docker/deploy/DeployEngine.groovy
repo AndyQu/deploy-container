@@ -19,10 +19,13 @@ import org.slf4j.LoggerFactory
 import org.slf4j.event.LoggingEvent
 
 import ch.qos.logback.core.util.StatusPrinter
+import com.andyqu.docker.deploy.event.DeployEvent
+import com.andyqu.docker.deploy.event.DeployStage;
 import com.andyqu.docker.deploy.history.DeployHistory
 import com.andyqu.docker.deploy.history.HistoryManager;
 import com.andyqu.docker.deploy.model.PortMeta
 import com.andyqu.docker.deploy.model.ProjectMeta
+import com.google.common.eventbus.EventBus;
 
 
 class DeployEngine {
@@ -31,6 +34,8 @@ class DeployEngine {
     def String host
 	def ProjectMetaManager projectMetaManager
 	def HistoryManager historyManager
+	def EventBus eventBus
+	def String containerName 
 
     def DeployEngine(String dockerHost, int port) {
         //'http://172.27.2.94:4243'
@@ -47,17 +52,18 @@ class DeployEngine {
 		
 		logger.info("\n====================部署项目${pMeta.projectName}-[开始]=======================")
         
-		/**
+		/*
          * 产生bash脚本,用于在docker容器内部部署Project:
          * 1. 创建环境变量
          * 2. 将代码从gitRepoUri上pull下来,切换到分支:GitbranchName
          * 3. 初始化subModule
          * 4. deployScriptFile的bash command
          */
+		postEvent(new DeployEvent(stage:DeployStage.CreateDeployFile))
         def deployScriptPath = "${contextFolderPath}/scripts/deploy_${pMeta.projectName}.sh"
         def deployFile = new File(deployScriptPath)
         deployFile.createNewFile()
-        /**
+        /*
          * 拉取主工程代码
          */
         deployFile << """
@@ -68,12 +74,13 @@ cd ${pMeta.projectName}
 git checkout ${pMeta.gitbranchName}
 git pull
 """
-        /**
+        /*
          * 拉取子工程代码
          * project/sub project之间的关系是其内部关系，不应该与部署系统耦合在一起。
          * 之前，部署系统会主动要求用户输入sub project的分支，然后去拉取，这是不对的。
          * RD应自己保证工程的可编译、可打包。
          */
+
         deployFile << """
 git submodule update --init --recursive
 """
@@ -93,6 +100,7 @@ git submodule update --init --recursive
         /**
          * 使用docker exec API接口, 执行自动产生的bash脚本
          */
+		 postEvent(new DeployEvent(stage:DeployStage.ExecDeployBashFile))
         long startT=System.currentTimeMillis();
         DockerResponse response = dClient.exec(
                 containerId,
@@ -114,8 +122,12 @@ git submodule update --init --recursive
 		assert pMetaList!=null
 		assert imgName!=null
 		assert contextConfig!=null
+		this.containerName=dockerName
 		
-		
+		/*
+		 * Start
+		 */
+		 postEvent(new DeployEvent(stage:DeployStage.Start))
 		DeployHistory history=new DeployHistory(
 			contextConfig:contextConfig, 
 			startTimeStamp:System.currentTimeSeconds(),
@@ -124,49 +136,54 @@ git submodule update --init --recursive
 		)
         def contextFolderPath = null
         def deployScriptPath = null
-        /**
-         * 根据分支名称,产生md5,与ownerName一起作为docker的名称
-         *
-         * */
-        
 		history.setContainerName(dockerName)
         contextFolderPath = "${contextConfig.workFolder}/${dockerName}/"
 
-        /**
+        /*
          * 检查当前是否已经存在同名的docker实例
          */
+		 postEvent(new DeployEvent(stage:DeployStage.CheckSameNameContainer))
         Boolean dockerExists = false
         def container = dClient.queryContainerName(dockerName)
 		logger.info "event_name=检查是否存在同名Docker_Container name=${dockerName}"
 		
-		/**
+		/*
 		 * 停止/删除已存在的container
 		 */
 		if (container != null) {
+			 postEvent(new DeployEvent(stage:DeployStage.StopAndRemoveContainer))
 			logger.info("event_name=发现同名container_停止并删除它 name=${dockerName}");
 			dClient.stopAndRemoveContainer(container.Id)
 		}else{
 			logger.info "event_name=不存在同名container name=${dockerName}"
 		}
 		
+		/*
+		 * 申请Host端口
+		 */
+		 postEvent(new DeployEvent(stage:DeployStage.ApplyPortsFromHost))
         List<Object> configedPortList  = allocateNewPorts(pMetaList, dClient.queryAllContainerPorts(), this.logger)
+		
 
-        /**
+        /*
          * 需要挂载的目录:
          */
+		 postEvent(new DeployEvent(stage:DeployStage.CalcMountPoints))
         def (allMountPoints, nonLibMountPoints) = calcMountPoints(pMetaList, dockerName, contextFolderPath, contextConfig, this.logger)
         
-        /**
+        /*
          * 创建/docker-deploy目录
          * 在/docker-deploy目录下面创建属于本次部署的私有目录: /docker-deploy/${docker-name}*/
+		 postEvent(new DeployEvent(stage:DeployStage.BuildFolders))
         buildContextFolder(contextFolderPath, nonLibMountPoints, this.logger)
 
-        /**
-         * 再创建docker container
+        /*
+         * 创建docker container
          * 1. container名称
          * 1. 端口映射
          * 2. 目录挂载
          */
+		 postEvent(new DeployEvent(stage:DeployStage.SetupContainerConfig))
         def containerConfig = [
                 "Cmd"         : ["/sbin/init"],
                 "Image"       : imgName,
@@ -198,11 +215,13 @@ git submodule update --init --recursive
         logger.info("event_name=将要创建的container信息 container_config=\n${confString}")
 		
 		
+		 postEvent(new DeployEvent(stage:DeployStage.CreateContainer))
 		logger.info("\n====================创建并启动container-[开始]=======================")
         def createResponse = dClient.createContainer(containerConfig, [name: dockerName])
 		def containerId = createResponse.content.Id
 		history.setContainerId(containerId)
         if (createResponse.status.success) {
+			 postEvent(new DeployEvent(stage:DeployStage.StartContainer))
 			logger.info "event_name=创建container成功 container_id=${containerId}"
             def startResponse = dClient.startContainer(containerId)
 			if(startResponse.status.success){
@@ -212,21 +231,23 @@ git submodule update --init --recursive
 				history.setStatus(false)
 				history.setEndTimeStamp(System.currentTimeSeconds())
 				historyManager.save(history)
+				 postEvent(new DeployEvent(stage:DeployStage.SaveFailedHistory))
 				throw new Exception("event_name=启动container失败 key=${dockerName} response=${startResponse}")
 			}
         } else {
 			history.setStatus(false)
 			history.setEndTimeStamp(System.currentTimeSeconds())
 			historyManager.save(history)
-			
+			 postEvent(new DeployEvent(stage:DeployStage.SaveFailedHistory))
             logger.error("event_name=创建container失败 docker_name=${dockerName} response=${createResponse}")
             throw new Exception("event_name=创建container失败 key=${dockerName} response=${createResponse}")
         }
 		logger.info("\n====================创建并启动container-[结束]=======================\n")
 
-        /**
+        /*
          * 对于每一个ProjectMeta, 进行部署工作
          */
+		 postEvent(new DeployEvent(stage:DeployStage.DeployProjectInContainer))
         pMetaList.each {
             pMeta ->
 				history.getProjectNames().add(pMeta.projectName)
@@ -241,6 +262,7 @@ git submodule update --init --recursive
 		history.setEndTimeStamp(System.currentTimeSeconds())
 		history.setStatus(true)
 		historyManager.save(history)
+		 postEvent(new DeployEvent(stage:DeployStage.SaveSuccessHistory))
     }
 
     /**
@@ -409,4 +431,20 @@ git submodule update --init --recursive
         }
 		logger.info "\n============================创建Context文件夹-[结束]===========================\n"
     }
+	
+	def postEvent(DeployEvent event){
+		logger.info "event_name=post_event event={}", event
+		event.setContainerName(this.containerName)
+		eventBus.post(event)
+		switch(event.stage){
+			case DeployStage.SaveFailedHistory:
+				postEvent(new DeployEvent(stage:DeployStage.END));
+				break;
+			case DeployStage.SaveSuccessHistory:
+				postEvent(new DeployEvent(stage:DeployStage.END));
+				break;
+			default:
+				break;
+		}
+	}
 }
