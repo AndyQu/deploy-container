@@ -433,8 +433,8 @@ git submodule update --init --recursive
     }
 	
 	def postEvent(DeployEvent event){
-		logger.info "event_name=post_event event={}", event
 		event.setContainerName(this.containerName)
+		logger.info "event_name=post_event event={}", event
 		eventBus.post(event)
 		switch(event.stage){
 			case DeployStage.SaveFailedHistory:
