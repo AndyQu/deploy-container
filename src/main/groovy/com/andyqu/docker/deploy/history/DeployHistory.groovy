@@ -40,7 +40,7 @@ class DeployHistory {
 	}
 	
 	def String toSimpleString(){
-		ReflectionToStringBuilder builder = new ReflectionToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+		ReflectionToStringBuilder builder = new ReflectionToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 		builder.setExcludeFieldNames("contextConfig", "containerConfig")
 		builder.toString()
 	}
