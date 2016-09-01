@@ -83,6 +83,13 @@ class ProjectMetaManager {
 		LOGGER.info "获取项目Meta：${projectNames}"
 		nameMetaMap.subMap(projectNames.collect {it->it.toLowerCase()}).values()
 	}
+	
+	def ProjectMeta getProjectMeta(String projectName){
+		def meta=nameMetaMap[projectName.toLowerCase()]
+		LOGGER.info "获取项目Meta：${projectName} meta={}", meta
+		meta
+	}
+	
 	def String getProjectBashFile(String projectName){
 		LOGGER.info "获取项目Bash脚本：${projectName}"
 		nameBashMap[projectName.toLowerCase()]

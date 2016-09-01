@@ -117,9 +117,9 @@ git submodule update --init --recursive
 		logger.info("\n====================部署项目${pMeta.projectName}-[结束]=======================")
     }
 
-    def deploy(String dockerName, String ownerName, List<ProjectMeta> pMetaList, String imgName, contextConfig) {
+    def deploy(String dockerName, String ownerName, ProjectMeta pMeta, String imgName, contextConfig) {
 		assert ownerName!=null
-		assert pMetaList!=null
+		assert pMeta!=null
 		assert imgName!=null
 		assert contextConfig!=null
 		this.containerName=dockerName
@@ -162,14 +162,14 @@ git submodule update --init --recursive
 		 * 申请Host端口
 		 */
 		 postEvent(new DeployEvent(stage:DeployStage.ApplyPortsFromHost))
-        List<Object> configedPortList  = allocateNewPorts(pMetaList, dClient.queryAllContainerPorts(), this.logger)
+        List<Object> configedPortList  = allocateNewPorts(pMeta, dClient.queryAllContainerPorts(), this.logger)
 		
 
         /*
          * 需要挂载的目录:
          */
 		 postEvent(new DeployEvent(stage:DeployStage.CalcMountPoints))
-        def (allMountPoints, nonLibMountPoints) = calcMountPoints(pMetaList, dockerName, contextFolderPath, contextConfig, this.logger)
+        def (allMountPoints, nonLibMountPoints) = calcMountPoints(pMeta, dockerName, contextFolderPath, contextConfig, this.logger)
         
         /*
          * 创建/docker-deploy目录
@@ -248,11 +248,8 @@ git submodule update --init --recursive
          * 对于每一个ProjectMeta, 进行部署工作
          */
 		 postEvent(new DeployEvent(stage:DeployStage.DeployProjectInContainer))
-        pMetaList.each {
-            pMeta ->
-				history.getProjectNames().add(pMeta.projectName)
-                _deploy(contextFolderPath, containerId, pMeta as ProjectMeta)
-        }
+		history.setProjectName(pMeta.projectName)
+        _deploy(contextFolderPath, containerId, pMeta as ProjectMeta)
 
         logger.info("\n\n\n部署完毕.")
         logger.info("主机IP:${host}")
@@ -267,10 +264,11 @@ git submodule update --init --recursive
 
     /**
      * 搜集并分配所有需要被映射的端口,包括debug端口
-     * @param pMetaList
+     * @param pmeta
      * @return
      */
-    def static List<Object> allocateNewPorts(List<ProjectMeta> pMetaList, List<Integer> allContainerPorts, Logger logger) {
+    def static List<Object> allocateNewPorts(ProjectMeta pmeta, List<Integer> allContainerPorts, Logger logger) {
+		def pMetaList=[pmeta]
         /**
          * 搜集所有需要被映射的端口
          */
@@ -355,10 +353,11 @@ git submodule update --init --recursive
      * 2. gradle
      * 3. ~/.ssh
      * 4. 日志目录
-     * @param pMetaList
+     * @param pmeta
      * @return
      */
-    def static calcMountPoints(List<ProjectMeta> pMetaList, dockerName, contextFolderPath, jsonData, Logger logger) {
+    def static calcMountPoints(ProjectMeta pmeta, dockerName, contextFolderPath, jsonData, Logger logger) {
+		def pMetaList=[pmeta]
         Set<String> containerInnerVolumnSet = pMetaList.inject(new HashSet<>()) {
             volumnSet, pMeta ->
                 if (pMeta.logFolder != null) {

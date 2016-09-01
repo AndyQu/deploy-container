@@ -34,7 +34,7 @@ class HistoryManager {
 	HistoryManager(){
 	}
 	def save(DeployHistory history){
-		def tName=tableName(history.getProjectNames().join("_"))
+		def tName=tableName(history.getProjectName())
 		db[tName].insert(history.toMap())
 		LOGGER.info "event_name=save_deployhistory history_item={}", history.toSimpleString()
 	}

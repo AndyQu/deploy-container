@@ -29,7 +29,7 @@ class TestHistoryManager {
 			new DeployHistory(
 				startTimeStamp:time,
 				endTimeStamp:time+100,
-				projectNames:["webhivesql"],
+				projectName:"webhivesql",
 				containerName:"annoy-master-webhivesql",
 				containerId:"e12eba6ee03b",
 				hostName:"andyqu-dev",
@@ -38,7 +38,7 @@ class TestHistoryManager {
 			new DeployHistory(
 				startTimeStamp:time+2000,
 				endTimeStamp:time+3000,
-				projectNames:["crm"],
+				projectName:"crm",
 				containerName:"andy-dev-webhivesql",
 				containerId:"e12eba6ee03b",
 				hostName:"andyqu-dev",
