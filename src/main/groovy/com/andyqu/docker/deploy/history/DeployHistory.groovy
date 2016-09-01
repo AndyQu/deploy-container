@@ -1,5 +1,7 @@
 package com.andyqu.docker.deploy.history
 import groovy.transform.ToString
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder
+import org.apache.commons.lang3.builder.ToStringStyle
 
 class DeployHistory {
 	def projectNames=[];
@@ -35,5 +37,11 @@ class DeployHistory {
 	public void setEndTimeStamp(long endTimeStamp) {
 		this.endTimeStamp = endTimeStamp;
 		this.endTime=new Date(endTimeStamp*1000).getDateTimeString()
+	}
+	
+	def String toSimpleString(){
+		ReflectionToStringBuilder builder = new ReflectionToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+		builder.setExcludeFieldNames("contextConfig", "containerConfig")
+		builder.toString()
 	}
 }

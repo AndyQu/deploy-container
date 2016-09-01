@@ -45,16 +45,19 @@ class HistoryManager {
 	 * @param condition
 	 * @return
 	 */
-	def List<DBObject> fetchHistories(String projectName, condition=[:], sort=[startTimeStamp:-1],limit=java.lang.Integer.MAX_VALUE){
-		List<DBObject> histories=[]
+	def List<DeployHistory> fetchHistories(String projectName, condition=[:], sort=[startTimeStamp:-1],limit=java.lang.Integer.MAX_VALUE){
+		List<DeployHistory> histories=[]
 		def tableName=tableName(projectName)
 		try{
 			LOGGER.info("event_name=fetching_histories projectName={} condition={}", tableName, condition)
 			//降序
 			db."${tableName}".find(condition).limit(limit).sort(sort).each {
 				//					LOGGER.info("event_name=show_history history={}",new JsonBuilder(it).toPrettyString())
-				LOGGER.info "event_name=show_history key={} history={}",tableName, it.toString()
-				histories.add(it)
+				def tm=it.toMap()
+				tm.remove("_id")
+				DeployHistory his=new DeployHistory(tm)
+				LOGGER.info "event_name=show_history key={} history={}",tableName, his.toSimpleString()
+				histories.add(his)
 			}
 			histories
 		}catch(MongoTimeoutException e){
