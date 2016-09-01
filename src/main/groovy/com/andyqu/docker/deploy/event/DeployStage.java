@@ -1,8 +1,8 @@
 package com.andyqu.docker.deploy.event;
 
-import groovy.transform.ToString;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
-@ToString
 public enum DeployStage {
 	Start(1, null),
 	CheckSameNameContainer(2,null),
@@ -49,5 +49,10 @@ public enum DeployStage {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	
+	@Override
+	public String toString() {
+		return ReflectionToStringBuilder.toString(this, ToStringStyle.MULTI_LINE_STYLE);
 	}
 }

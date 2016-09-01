@@ -1,9 +1,9 @@
 package com.andyqu.docker.deploy.event
 
-import groovy.transform.ToString
+import com.andyqu.docker.BaseBean
 
-@ToString
-class DeployEvent {
+
+class DeployEvent extends BaseBean{
 	String containerName
 	DeployStage stage	
 }
